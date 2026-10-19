@@ -90,12 +90,6 @@ def pembersihan_teks(text):
 @st.cache_resource
 def load_models():
     model = joblib.load('model_svm_jaki.pkl')
-    
-    # --- BARIS AJAIB PENYELAMAT ERROR (PATCH VERSION MISMATCH) ---
-    if not hasattr(model, '_effective_probability'):
-        model._effective_probability = False
-    # -------------------------------------------------------------
-    
     vectorizer = joblib.load('tfidf_jaki.pkl')
     return model, vectorizer
 
