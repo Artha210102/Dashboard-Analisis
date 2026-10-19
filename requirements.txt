@@ -1,10 +1,9 @@
 streamlit
 pandas
-numpy
-scikit-learn==1.6.1
+scikit-learn
 plotly
-matplotlib
 joblib
+matplotlib
 Sastrawi
 nltk
 wordcloud
