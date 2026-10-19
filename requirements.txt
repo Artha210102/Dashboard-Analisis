@@ -5,6 +5,6 @@ scikit-learn
 plotly
 matplotlib
 joblib
-Sastrawi
+sastrawi
 nltk
 wordcloud
