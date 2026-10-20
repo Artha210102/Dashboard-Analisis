@@ -4,6 +4,7 @@ import numpy as np
 import re
 import joblib
 import nltk
+import textwrap
 from nltk.corpus import stopwords
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import plotly.express as px
@@ -20,9 +21,6 @@ st.markdown("""
     .sub-header {text-align: center; color: #6B7280; margin-bottom: 30px;}
     .success-box {padding: 15px; border-radius: 10px; background-color: #D1FAE5; border-left: 5px solid #059669; margin-top: 10px;}
     .error-box {padding: 15px; border-radius: 10px; background-color: #FEE2E2; border-left: 5px solid #DC2626; margin-top: 10px;}
-    
-    /* Menghilangkan padding berlebih dari Streamlit */
-    .block-container {padding-top: 2rem; padding-bottom: 2rem;}
     
     /* Styling Custom KPI Cards */
     .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
@@ -114,7 +112,6 @@ except Exception as e:
 st.markdown('<p class="main-header">🏛️ Dashboard Analisis Sentimen Aplikasi JAKI</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Berbasis Support Vector Machine (SVM) | Oleh: Artha Nugraha</p>', unsafe_allow_html=True)
 
-# Inisialisasi Session State
 if 'df_hasil' not in st.session_state:
     st.session_state.df_hasil = None
 
@@ -128,7 +125,7 @@ with tab1:
     st.subheader("Cek Ulasan Spesifik")
     user_input = st.text_area("Ketik keluhan atau ulasan secara manual:", placeholder="Contoh: Aplikasi JAKI lemot banget pas mau daftar vaksin, tolong diperbaiki!")
     
-    if st.button("Prediksi Sentimen", type="primary", key="btn_prediksi_tunggal"):
+    if st.button("Prediksi Sentimen", type="primary"):
         if user_input.strip() == "":
             st.warning("Mohon masukkan teks ulasan terlebih dahulu!")
         else:
@@ -152,7 +149,7 @@ with tab1:
 # ==========================================
 with tab2:
     st.subheader("Unggah Data Ulasan Baru")
-    st.info("⚠️ **Catatan Sistem:** Harap unggah file hasil scraping (CSV/Excel) yang memiliki kolom **'Ulasan'** dan **'Jumlah_Like'**.")
+    st.info("⚠️ **Catatan Sistem:** Harap unggah file hasil scraping (CSV/Excel) yang memiliki kolom **'Ulasan'**.")
     
     uploaded_file = st.file_uploader("Unggah File (Drag and Drop)", type=['csv', 'xlsx'])
     
@@ -167,8 +164,7 @@ with tab2:
                 st.error("❌ Akses Ditolak: Kolom 'Ulasan' tidak ditemukan di dalam file.")
             else:
                 st.success(f"✅ File tervalidasi! Menemukan {df.shape[0]} baris ulasan.")
-                
-                if st.button("Mulai Pembersihan & Analisis Massal", type="primary", key="btn_proses_massal"):
+                if st.button("Mulai Pembersihan & Analisis Massal", type="primary"):
                     with st.status("Memproses Data...", expanded=True) as status:
                         df_bersih = df.dropna(subset=['Ulasan']).copy()
                         df_bersih['Ulasan_Bersih'] = df_bersih['Ulasan'].apply(pembersihan_teks)
@@ -220,13 +216,12 @@ with tab3:
         """, unsafe_allow_html=True)
         
         st.write("---")
-        
-        # Mapping Warna Tableau
         color_map = {'Positif':'#4E79A7', 'Negatif':'#E15759'}
         
-        # --- BARIS 1: 3 CHART BERSAMPINGAN ---
+        # ==========================================
+        # BARIS 1: 3 CHART BERSAMPINGAN
+        # ==========================================
         col1, col2, col3 = st.columns(3)
-        
         sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
         sentimen_counts.columns = ['Sentimen', 'Jumlah']
         
@@ -234,43 +229,49 @@ with tab3:
             fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
                              color='Sentimen', color_discrete_map=color_map, hole=0.4)
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(margin=dict(t=40, b=0, l=0, r=0))
+            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with col2:
             fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', title='Distribusi Jumlah',
                              text='Jumlah', color='Sentimen', color_discrete_map=color_map)
             fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-            fig_bar.update_layout(margin=dict(t=40, b=0, l=0, r=0), showlegend=False)
+            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col3:
             if 'Jumlah_Like' in df_viz.columns:
                 df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
-                # Menambahkan sedikit 'jitter' buatan agar titik tidak bertumpuk di 1 garis lurus
-                df_viz['Jitter'] = df_viz['Label_Sentimen'] + np.random.uniform(-0.1, 0.1, size=len(df_viz)).astype(str)
+                # Bungkus teks ulasan agar turun ke bawah (wrap text) maks 50 karakter
+                df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
                 
                 fig_scatter = px.strip(df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
-                                         title="Impact Ulasan (Berdasarkan Like)",
-                                         hover_data=['Ulasan'], color_discrete_map=color_map)
-                fig_scatter.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
-                fig_scatter.update_layout(margin=dict(t=40, b=0, l=0, r=0), showlegend=False)
+                                         title="Sebaran Interaksi Ulasan (Berdasarkan Like)",
+                                         custom_data=['Ulasan_Wrap'], color_discrete_map=color_map)
+                
+                fig_scatter.update_traces(
+                    marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
+                    hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
+                )
+                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
                 st.plotly_chart(fig_scatter, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
         
         st.write("---")
         
-        # --- BARIS 2: 2 WORD CLOUD BERSAMPINGAN ---
-        col4, col5 = st.columns(2)
+        # ==========================================
+        # BARIS 2: 3 CHART BERSAMPINGAN (Wordcloud & Heatmap)
+        # ==========================================
+        col4, col5, col6 = st.columns(3)
         
         def buat_wordcloud(teks_gabungan, title, colormap):
             if len(teks_gabungan) > 0:
-                wc = WordCloud(width=600, height=300, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
-                fig, ax = plt.subplots(figsize=(8, 4))
+                wc = WordCloud(width=500, height=350, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
+                fig, ax = plt.subplots(figsize=(5, 3.5))
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
-                ax.set_title(title, fontsize=18, pad=10)
+                ax.set_title(title, fontsize=16, pad=10)
                 return fig
             return None
 
@@ -283,3 +284,39 @@ with tab3:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
             fig_wc_neg = buat_wordcloud(teks_neg, "☁️ Kata Kunci Negatif", "Reds")
             if fig_wc_neg: st.pyplot(fig_wc_neg)
+
+        with col6:
+            if 'Tanggal' in df_viz.columns:
+                # Konversi kolom Tanggal ke Datetime
+                df_viz['Tanggal_DT'] = pd.to_datetime(df_viz['Tanggal'], errors='coerce')
+                
+                # Ekstrak Hari dan Jam
+                hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
+                df_viz['Hari'] = df_viz['Tanggal_DT'].dt.dayofweek.map(hari_map)
+                df_viz['Jam'] = df_viz['Tanggal_DT'].dt.hour
+                
+                # Rekapitulasi jumlah ulasan per hari & jam
+                heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
+                pivot_data = heatmap_data.pivot(index='Hari', columns='Jam', values='Jumlah').fillna(0)
+                
+                # Urutkan hari dari Senin - Minggu
+                kategori_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+                pivot_data = pivot_data.reindex(kategori_hari[::-1]) # Dibalik agar Senin di atas
+                
+                # Pastikan kolom jam 0-23 lengkap terisi
+                for jam in range(24):
+                    if jam not in pivot_data.columns:
+                        pivot_data[jam] = 0
+                pivot_data = pivot_data[sorted(pivot_data.columns)]
+                
+                # Plot Heatmap mirip gaya Tableau (Plasma/Inferno)
+                fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
+                                   x=pivot_data.columns, y=pivot_data.index, 
+                                   color_continuous_scale="Plasma", aspect="auto",
+                                   title="Heatmap Review Velocity")
+                
+                fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
+                fig_hm.update_layout(margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
+                st.plotly_chart(fig_hm, use_container_width=True)
+            else:
+                st.info("💡 Kolom 'Tanggal' tidak ditemukan untuk membuat Heatmap.")
