@@ -274,21 +274,22 @@ with tab3:
                 fig, ax = plt.subplots(figsize=(5, 3.5))
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
-                # Parameter loc='left' ditambahkan untuk perataan teks ke kiri
-                ax.set_title(title, fontsize=16, pad=10, loc='left') 
-                fig.tight_layout(pad=1) # Menghilangkan ruang putih berlebih
+                ax.set_title(title, fontsize=16, pad=10, loc='left')
+                fig.tight_layout(pad=1)
                 return fig
             return None
 
         with col4:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
             fig_wc_pos = buat_wordcloud(teks_pos, "☁️ Kata Kunci Positif", "Blues")
-            if fig_wc_pos: st.plotly_chart(fig_wc_pos, use_container_width=True) if hasattr(fig_wc_pos, 'data') else st.pyplot(fig_wc_pos)
+            if fig_wc_pos: 
+                st.pyplot(fig_wc_pos)
 
         with col5:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
             fig_wc_neg = buat_wordcloud(teks_neg, "☁️ Kata Kunci Negatif", "Reds")
-            if fig_wc_neg: st.plotly_chart(fig_wc_neg, use_container_width=True) if hasattr(fig_wc_neg, 'data') else st.pyplot(fig_wc_neg)
+            if fig_wc_neg: 
+                st.pyplot(fig_wc_neg)
 
         with col6:
             if 'Tanggal_dan_Jam' in df_viz.columns:
@@ -318,7 +319,7 @@ with tab3:
                 fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
                                    x=pivot_data.columns, y=pivot_data.index, 
                                    color_continuous_scale="Plasma", aspect="auto",
-                                   title="Heatmap Review Velocity")
+                                   title="Kecepatan Ulasan Peta Panas")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
                 fig_hm.update_layout(margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
