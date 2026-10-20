@@ -152,11 +152,10 @@ with tab1:
 # ==========================================
 with tab2:
     st.subheader("Unggah Data Ulasan Baru")
-    st.info("⚠️ **Catatan Sistem:** Harap unggah file hasil scraping (CSV/Excel) yang memiliki kolom **'Ulasan'**.")
+    st.info("⚠️ **Catatan Sistem:** Unggah file CSV/Excel hasil scraping dengan kolom ulasan ('Ulasan', 'Review', 'Komentar', atau 'Text').")
     
     uploaded_file = st.file_uploader("Unggah File (Drag and Drop)", type=['csv', 'xlsx'])
     
-    # LOGIKA RESET MEMORI KETIKA FILE KOSONG
     if uploaded_file is None:
         st.session_state.df_hasil = None
     else:
@@ -165,34 +164,74 @@ with tab2:
                 df = pd.read_csv(uploaded_file)
             else:
                 df = pd.read_excel(uploaded_file)
-                
-            if 'Ulasan' not in df.columns:
-                st.error("❌ Akses Ditolak: Kolom 'Ulasan' tidak ditemukan di dalam file.")
-                # LOGIKA RESET MEMORI KETIKA FILE DITOLAK
+            
+            # 1. FLEKSIBILITAS NAMA KOLOM
+            kandidat_kolom = ['ulasan', 'review', 'reviews', 'komentar', 'comment', 'text', 'content']
+            kolom_terpilih = None
+            
+            for col in df.columns:
+                if str(col).strip().lower() in kandidat_kolom:
+                    kolom_terpilih = col
+                    break
+            
+            if kolom_terpilih is None:
+                st.error("❌ Akses Ditolak: Kolom ulasan tidak ditemukan. Harap gunakan kolom bernama 'Ulasan', 'Review', 'Komentar', atau 'Text'.")
                 st.session_state.df_hasil = None
             else:
-                st.success(f"✅ File tervalidasi! Menemukan {df.shape[0]} baris ulasan.")
-                if st.button("Mulai Pembersihan & Analisis Massal", type="primary"):
-                    with st.status("Memproses Data...", expanded=True) as status:
-                        df_bersih = df.dropna(subset=['Ulasan']).copy()
-                        df_bersih['Ulasan_Bersih'] = df_bersih['Ulasan'].apply(pembersihan_teks)
-                        df_bersih = df_bersih[df_bersih['Ulasan_Bersih'].str.strip() != '']
-                        
-                        vektor_massal = tfidf_vect.transform(df_bersih['Ulasan_Bersih'])
-                        df_bersih['Label_Sentimen'] = svm_model.predict(vektor_massal)
-                        
-                        st.session_state.df_hasil = df_bersih
-                        status.update(label="Pemrosesan Selesai!", state="complete", expanded=False)
+                # Samakan nama kolom menjadi 'Ulasan' untuk pemrosesan internal
+                df = df.rename(columns={kolom_terpilih: 'Ulasan'})
+                
+                # 2. VALIDASI KONTEKS BERLAPIS (KEYWORD HEURISTICS & TF-IDF OVERLAP)
+                teks_gabungan = " ".join(df['Ulasan'].dropna().astype(str).tolist()).lower()
+                
+                # A. Pembobotan Kata Kunci JAKI
+                kw_utama = ['jaki', 'jakarta kini', 'pemprov dki', 'dki jakarta', 'beritajakarta']
+                kw_fitur = ['jaklapor', 'jakpantau', 'jakwifi', 'jakwarta', 'jakrespon', 'kelurahan', 'kecamatan', 'rt/rw', 'lapor', 'crm', 'posyandu', 'pbb']
+                
+                skor_utama = sum(teks_gabungan.count(w) for w in kw_utama) * 3
+                skor_fitur = sum(teks_gabungan.count(w) for w in kw_fitur) * 1
+                total_skor_jaki = skor_utama + skor_fitur
+                
+                # B. Anti-Keywords (Domain Lain)
+                kw_domain_lain = ['driver', 'gojek', 'gofood', 'shopee', 'tokopedia', 'grab', 'pln', 'ongkir', 'pesanan', 'm-banking', 'seller']
+                skor_domain_lain = sum(teks_gabungan.count(w) for w in kw_domain_lain)
+                
+                # C. Check Kesesuaian Kosa Kata TF-IDF
+                sampel_teks = df['Ulasan'].dropna().astype(str).head(100)
+                sampel_vektor = tfidf_vect.transform(sampel_teks)
+                jumlah_fitur_match = (sampel_vektor.sum(axis=0) > 0).sum()
+                
+                # EVALUASI GERBANG KEAMANAN
+                if skor_domain_lain > total_skor_jaki and skor_domain_lain > 5:
+                    st.error("❌ Akses Ditolak (Keamanan Konteks): Terdeteksi ulasan dari aplikasi e-commerce/ride-hailing, bukan konteks aplikasi JAKI.")
+                    st.session_state.df_hasil = None
+                elif total_skor_jaki < 3 and jumlah_fitur_match < 5:
+                    st.error("❌ Akses Ditolak (Keamanan Konteks): File yang diunggah tidak mengandung kosa kata/entitas terkait pelayanan aplikasi JAKI.")
+                    st.session_state.df_hasil = None
+                else:
+                    st.success(f"✅ File tervalidasi! Memproses data dari kolom '{kolom_terpilih}' ({df.shape[0]} baris).")
                     
-                    with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
-                        st.dataframe(df_bersih.head(10), use_container_width=True)
-                    
-                    csv_output = df_bersih.to_csv(index=False).encode('utf-8')
-                    st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
-                    st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
+                    if st.button("Mulai Pembersihan & Analisis Massal", type="primary"):
+                        with st.status("Memproses Data...", expanded=True) as status:
+                            df_bersih = df.dropna(subset=['Ulasan']).copy()
+                            df_bersih['Ulasan_Bersih'] = df_bersih['Ulasan'].apply(pembersihan_teks)
+                            df_bersih = df_bersih[df_bersih['Ulasan_Bersih'].str.strip() != '']
+                            
+                            vektor_massal = tfidf_vect.transform(df_bersih['Ulasan_Bersih'])
+                            df_bersih['Label_Sentimen'] = svm_model.predict(vektor_massal)
+                            
+                            st.session_state.df_hasil = df_bersih
+                            status.update(label="Pemrosesan Selesai!", state="complete", expanded=False)
+                        
+                        with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
+                            st.dataframe(df_bersih.head(10), use_container_width=True)
+                        
+                        csv_output = df_bersih.to_csv(index=False).encode('utf-8')
+                        st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
+                        st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
+                        
         except Exception as e:
             st.error(f"Terjadi kesalahan teknis: {e}")
-            # LOGIKA RESET MEMORI KETIKA TERJADI ERROR SAAT MEMBACA FILE
             st.session_state.df_hasil = None
 
 # ==========================================
