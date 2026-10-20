@@ -229,14 +229,14 @@ with tab3:
             fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
                              color='Sentimen', color_discrete_map=color_map, hole=0.4)
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
+            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with col2:
             fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', title='Distribusi Jumlah',
                              text='Jumlah', color='Sentimen', color_discrete_map=color_map)
             fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
+            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col3:
@@ -253,7 +253,7 @@ with tab3:
                     marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                     hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                 )
-                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=False)
+                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
                 st.plotly_chart(fig_scatter, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
@@ -286,14 +286,15 @@ with tab3:
             if fig_wc_neg: st.pyplot(fig_wc_neg)
 
         with col6:
+            # Perbaikan pemanggilan kolom Tanggal_dan_Jam yang konsisten
             if 'Tanggal_dan_Jam' in df_viz.columns:
-                # Konversi kolom Tanggal ke Datetime
-                df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_danJam'], errors='coerce')
+                # Konversi kolom Tanggal_dan_Jam ke Datetime
+                df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
                 
-                # Ekstrak Hari dan Jam
+                # Ekstrak Hari dan Jam menggunakan kolom yang benar (Tanggal_dan_Jam_DT)
                 hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
-                df_viz['Hari'] = df_viz['Tanggal_DT'].dt.dayofweek.map(hari_map)
-                df_viz['Jam'] = df_viz['Tanggal_DT'].dt.hour
+                df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
+                df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
                 
                 # Rekapitulasi jumlah ulasan per hari & jam
                 heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
@@ -319,4 +320,4 @@ with tab3:
                 fig_hm.update_layout(margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
-                st.info("💡 Kolom 'Tanggal' tidak ditemukan untuk membuat Heatmap.")
+                st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
