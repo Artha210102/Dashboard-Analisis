@@ -25,7 +25,10 @@ st.markdown("""
     /* Styling Custom KPI Cards */
     .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
     .kpi-card {flex: 1; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); text-align: center;}
-    .kpi-total {background-color: #f8f9fa; border: 1px solid #e0e0e0;}
+    
+    /* MENAMBAHKAN GARIS ABU TERANG DI KIRI CARD TOTAL */
+    .kpi-total {background-color: #f8f9fa; border: 1px solid #e0e0e0; border-left: 6px solid #adb5bd;}
+    
     .kpi-positif {background-color: #F0F4FA; border-left: 6px solid #4E79A7;}
     .kpi-negatif {background-color: #FDF0F0; border-left: 6px solid #E15759;}
     .kpi-title {font-size: 1.1rem; font-weight: 600; margin: 0; padding-bottom: 5px;}
@@ -229,14 +232,14 @@ with tab3:
             fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
                              color='Sentimen', color_discrete_map=color_map, hole=0.4)
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
+            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with col2:
             fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', title='Distribusi Jumlah',
                              text='Jumlah', color='Sentimen', color_discrete_map=color_map)
             fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
+            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
             st.plotly_chart(fig_bar, use_container_width=True)
             
         with col3:
@@ -253,7 +256,7 @@ with tab3:
                     marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                     hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                 )
-                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True) # Mengembalikan legenda
+                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
                 st.plotly_chart(fig_scatter, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
@@ -271,27 +274,28 @@ with tab3:
                 fig, ax = plt.subplots(figsize=(5, 3.5))
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
-                ax.set_title(title, fontsize=16, pad=10)
+                # Parameter loc='left' ditambahkan untuk perataan teks ke kiri
+                ax.set_title(title, fontsize=16, pad=10, loc='left') 
+                fig.tight_layout(pad=1) # Menghilangkan ruang putih berlebih
                 return fig
             return None
 
         with col4:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
             fig_wc_pos = buat_wordcloud(teks_pos, "☁️ Kata Kunci Positif", "Blues")
-            if fig_wc_pos: st.pyplot(fig_wc_pos)
+            if fig_wc_pos: st.plotly_chart(fig_wc_pos, use_container_width=True) if hasattr(fig_wc_pos, 'data') else st.pyplot(fig_wc_pos)
 
         with col5:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
             fig_wc_neg = buat_wordcloud(teks_neg, "☁️ Kata Kunci Negatif", "Reds")
-            if fig_wc_neg: st.pyplot(fig_wc_neg)
+            if fig_wc_neg: st.plotly_chart(fig_wc_neg, use_container_width=True) if hasattr(fig_wc_neg, 'data') else st.pyplot(fig_wc_neg)
 
         with col6:
-            # Perbaikan pemanggilan kolom Tanggal_dan_Jam yang konsisten
             if 'Tanggal_dan_Jam' in df_viz.columns:
                 # Konversi kolom Tanggal_dan_Jam ke Datetime
                 df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
                 
-                # Ekstrak Hari dan Jam menggunakan kolom yang benar (Tanggal_dan_Jam_DT)
+                # Ekstrak Hari dan Jam
                 hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
                 df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
                 df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
