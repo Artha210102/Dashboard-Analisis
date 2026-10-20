@@ -245,7 +245,6 @@ with tab3:
         with col3:
             if 'Jumlah_Like' in df_viz.columns:
                 df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
-                # Bungkus teks ulasan agar turun ke bawah (wrap text) maks 50 karakter
                 df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
                 
                 fig_scatter = px.strip(df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
@@ -274,55 +273,51 @@ with tab3:
                 fig, ax = plt.subplots(figsize=(5, 3.5))
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
-                ax.set_title(title, fontsize=16, pad=10, loc='left')
+                # Penyesuaian font judul agar mirip Plotly (sans-serif) tanpa emoji
+                ax.set_title(title, fontfamily='sans-serif', fontweight='normal', fontsize=14, pad=10, loc='left')
                 fig.tight_layout(pad=1)
                 return fig
             return None
 
         with col4:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
-            fig_wc_pos = buat_wordcloud(teks_pos, "☁️ Kata Kunci Positif", "Blues")
+            fig_wc_pos = buat_wordcloud(teks_pos, "Kata Kunci Positif", "Blues")
             if fig_wc_pos: 
                 st.pyplot(fig_wc_pos)
 
         with col5:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
-            fig_wc_neg = buat_wordcloud(teks_neg, "☁️ Kata Kunci Negatif", "Reds")
+            fig_wc_neg = buat_wordcloud(teks_neg, "Kata Kunci Negatif", "Reds")
             if fig_wc_neg: 
                 st.pyplot(fig_wc_neg)
 
         with col6:
             if 'Tanggal_dan_Jam' in df_viz.columns:
-                # Konversi kolom Tanggal_dan_Jam ke Datetime
                 df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
-                
-                # Ekstrak Hari dan Jam
                 hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
                 df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
                 df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
                 
-                # Rekapitulasi jumlah ulasan per hari & jam
                 heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
                 pivot_data = heatmap_data.pivot(index='Hari', columns='Jam', values='Jumlah').fillna(0)
-                
-                # Urutkan hari dari Senin - Minggu
                 kategori_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
-                pivot_data = pivot_data.reindex(kategori_hari[::-1]) # Dibalik agar Senin di atas
+                pivot_data = pivot_data.reindex(kategori_hari[::-1])
                 
-                # Pastikan kolom jam 0-23 lengkap terisi
                 for jam in range(24):
                     if jam not in pivot_data.columns:
                         pivot_data[jam] = 0
                 pivot_data = pivot_data[sorted(pivot_data.columns)]
                 
-                # Plot Heatmap mirip gaya Tableau (Plasma/Inferno)
+                # Mengubah warna heatmap menjadi Blues yang lebih elegan
                 fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
                                    x=pivot_data.columns, y=pivot_data.index, 
-                                   color_continuous_scale="Plasma", aspect="auto",
+                                   color_continuous_scale="Blues", aspect="auto",
                                    title="Kecepatan Ulasan Peta Panas")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
-                fig_hm.update_layout(margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
+                
+                # Menyesuaikan margin t=30 agar sejajar dengan tinggi Word Cloud
+                fig_hm.update_layout(margin=dict(t=30, b=20, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
