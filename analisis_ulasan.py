@@ -9,27 +9,29 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import plotly.express as px
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import time
 
 # --- PENGATURAN HALAMAN ---
 st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
 
-# --- CUSTOM CSS ---
+# --- CUSTOM CSS LANJUTAN ---
 st.markdown("""
     <style>
     .main-header {font-size: 2.5rem; color: #1E3A8A; text-align: center; font-weight: bold;}
     .sub-header {text-align: center; color: #6B7280; margin-bottom: 30px;}
     .success-box {padding: 15px; border-radius: 10px; background-color: #D1FAE5; border-left: 5px solid #059669; margin-top: 10px;}
     .error-box {padding: 15px; border-radius: 10px; background-color: #FEE2E2; border-left: 5px solid #DC2626; margin-top: 10px;}
-    /* Styling untuk KPI Cards */
-    div[data-testid="stMetricValue"] {font-size: 2rem;}
-    /* Styling untuk meniru layout card Tableau */
-    .css-1r6slb0 {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 10px;
-        border: 1px solid #e0e0e0;
-    }
+    
+    /* Menghilangkan padding berlebih dari Streamlit */
+    .block-container {padding-top: 2rem; padding-bottom: 2rem;}
+    
+    /* Styling Custom KPI Cards */
+    .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
+    .kpi-card {flex: 1; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); text-align: center;}
+    .kpi-total {background-color: #f8f9fa; border: 1px solid #e0e0e0;}
+    .kpi-positif {background-color: #F0F4FA; border-left: 6px solid #4E79A7;}
+    .kpi-negatif {background-color: #FDF0F0; border-left: 6px solid #E15759;}
+    .kpi-title {font-size: 1.1rem; font-weight: 600; margin: 0; padding-bottom: 5px;}
+    .kpi-value {font-size: 2.5rem; font-weight: bold; margin: 0;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -112,7 +114,7 @@ except Exception as e:
 st.markdown('<p class="main-header">🏛️ Dashboard Analisis Sentimen Aplikasi JAKI</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Berbasis Support Vector Machine (SVM) | Oleh: Artha Nugraha</p>', unsafe_allow_html=True)
 
-# Inisialisasi Session State untuk menyimpan data agar bisa diakses antar Tab
+# Inisialisasi Session State
 if 'df_hasil' not in st.session_state:
     st.session_state.df_hasil = None
 
@@ -150,7 +152,7 @@ with tab1:
 # ==========================================
 with tab2:
     st.subheader("Unggah Data Ulasan Baru")
-    st.info("⚠️ **Catatan Sistem:** Sistem hanya menerima file CSV/Excel hasil scraping JAKI yang memuat minimal kolom **'Ulasan'**, dan idealnya beserta **'Rating'** & **'Jumlah_Like'**.")
+    st.info("⚠️ **Catatan Sistem:** Harap unggah file hasil scraping (CSV/Excel) yang memiliki kolom **'Ulasan'** dan **'Jumlah_Like'**.")
     
     uploaded_file = st.file_uploader("Unggah File (Drag and Drop)", type=['csv', 'xlsx'])
     
@@ -162,144 +164,122 @@ with tab2:
                 df = pd.read_excel(uploaded_file)
                 
             if 'Ulasan' not in df.columns:
-                st.error("❌ **AKSES DITOLAK:** Struktur file tidak dikenali! Harap pastikan ini adalah file yang memuat kolom 'Ulasan'.")
+                st.error("❌ Akses Ditolak: Kolom 'Ulasan' tidak ditemukan di dalam file.")
             else:
                 st.success(f"✅ File tervalidasi! Menemukan {df.shape[0]} baris ulasan.")
                 
                 if st.button("Mulai Pembersihan & Analisis Massal", type="primary", key="btn_proses_massal"):
                     with st.status("Memproses Data...", expanded=True) as status:
-                        st.write("Menginisialisasi engine pembersihan...")
-                        
                         df_bersih = df.dropna(subset=['Ulasan']).copy()
-                        
-                        st.write("Membersihkan emoji, slang, kata hubung (Sastrawi)...")
                         df_bersih['Ulasan_Bersih'] = df_bersih['Ulasan'].apply(pembersihan_teks)
-                        
                         df_bersih = df_bersih[df_bersih['Ulasan_Bersih'].str.strip() != '']
                         
-                        st.write("Melakukan prediksi sentimen via SVM...")
                         vektor_massal = tfidf_vect.transform(df_bersih['Ulasan_Bersih'])
                         df_bersih['Label_Sentimen'] = svm_model.predict(vektor_massal)
                         
-                        # Simpan ke session state
                         st.session_state.df_hasil = df_bersih
-                        
                         status.update(label="Pemrosesan Selesai!", state="complete", expanded=False)
                     
-                    # Tampilkan Sampel Data di Expander agar lebih rapi
                     with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
                         st.dataframe(df_bersih.head(10), use_container_width=True)
                     
                     csv_output = df_bersih.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Unduh Hasil Keseluruhan (CSV)",
-                        data=csv_output,
-                        file_name='Hasil_Analisis_JAKI_Terbaru.csv',
-                        mime='text/csv',
-                    )
-                    
-                    st.success("🎉 Pemrosesan sukses! Silakan buka **Tab 3: Dashboard Visualisasi** untuk melihat grafiknya.")
-
+                    st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
+                    st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat visualisasi cantik Anda.")
         except Exception as e:
             st.error(f"Terjadi kesalahan teknis: {e}")
 
 # ==========================================
-# TAB 3: DASHBOARD VISUALISASI
+# TAB 3: DASHBOARD VISUALISASI EKSKLUSIF
 # ==========================================
 with tab3:
     if st.session_state.df_hasil is None:
-        st.warning("⚠️ Silakan lakukan Pemrosesan Massal terlebih dahulu di **Tab 2** untuk melihat visualisasi.")
+        st.warning("⚠️ Silakan unggah dan proses data di **Tab 2** terlebih dahulu untuk mengaktifkan Dashboard.")
     else:
-        st.subheader("📊 Dashboard Visualisasi Analisis Sentimen")
         df_viz = st.session_state.df_hasil
-        
-        # --- KARTU METRIK (KPI) ---
         total_ulasan = len(df_viz)
         jml_positif = len(df_viz[df_viz['Label_Sentimen'] == 'Positif'])
         jml_negatif = len(df_viz[df_viz['Label_Sentimen'] == 'Negatif'])
         
-        col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
-        col_kpi1.metric("Total Ulasan Diproses", f"{total_ulasan:,}")
-        col_kpi2.metric("Sentimen Positif (Biru)", f"{jml_positif:,}", f"{round((jml_positif/total_ulasan)*100, 1)}%")
-        col_kpi3.metric("Sentimen Negatif (Merah)", f"{jml_negatif:,}", f"{round((jml_negatif/total_ulasan)*100, 1)}%", delta_color="inverse")
+        # --- KARTU METRIK HTML/CSS CUSTOM ---
+        st.markdown(f"""
+        <div class="kpi-container">
+            <div class="kpi-card kpi-total">
+                <p class="kpi-title" style="color:#6c757d;">Total Ulasan Diproses</p>
+                <p class="kpi-value" style="color:#343a40;">{total_ulasan:,}</p>
+            </div>
+            <div class="kpi-card kpi-positif">
+                <p class="kpi-title" style="color:#4E79A7;">Sentimen Positif (Biru)</p>
+                <p class="kpi-value" style="color:#4E79A7;">{jml_positif:,} <span style="font-size:1rem;">({round((jml_positif/total_ulasan)*100, 1)}%)</span></p>
+            </div>
+            <div class="kpi-card kpi-negatif">
+                <p class="kpi-title" style="color:#E15759;">Sentimen Negatif (Merah)</p>
+                <p class="kpi-value" style="color:#E15759;">{jml_negatif:,} <span style="font-size:1rem;">({round((jml_negatif/total_ulasan)*100, 1)}%)</span></p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        st.divider()
+        st.write("---")
         
-        # --- BARIS 1: PIE & BAR CHART ---
+        # Mapping Warna Tableau
+        color_map = {'Positif':'#4E79A7', 'Negatif':'#E15759'}
+        
+        # --- BARIS 1: 3 CHART BERSAMPINGAN ---
+        col1, col2, col3 = st.columns(3)
+        
         sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
         sentimen_counts.columns = ['Sentimen', 'Jumlah']
         
-        # Mapping Warna (Positif: Biru Tableau, Negatif: Merah Tableau)
-        color_map = {'Positif':'#4E79A7', 'Negatif':'#E15759'}
-        
-        col1, col2 = st.columns(2)
-        
         with col1:
-            fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', 
-                             title='Sentimen Keseluruhan',
-                             color='Sentimen',
-                             color_discrete_map=color_map,
-                             hole=0.4) # Donut chart sedikit mirip tableau
+            fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
+                             color='Sentimen', color_discrete_map=color_map, hole=0.4)
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pie.update_layout(margin=dict(t=40, b=0, l=0, r=0))
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with col2:
-            fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', 
-                             title='Distribusi Jumlah Sentimen',
-                             text='Jumlah',
-                             color='Sentimen',
-                             color_discrete_map=color_map)
+            fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', title='Distribusi Jumlah',
+                             text='Jumlah', color='Sentimen', color_discrete_map=color_map)
             fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
+            fig_bar.update_layout(margin=dict(t=40, b=0, l=0, r=0), showlegend=False)
             st.plotly_chart(fig_bar, use_container_width=True)
             
-        st.divider()
+        with col3:
+            if 'Jumlah_Like' in df_viz.columns:
+                df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
+                # Menambahkan sedikit 'jitter' buatan agar titik tidak bertumpuk di 1 garis lurus
+                df_viz['Jitter'] = df_viz['Label_Sentimen'] + np.random.uniform(-0.1, 0.1, size=len(df_viz)).astype(str)
+                
+                fig_scatter = px.strip(df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
+                                         title="Impact Ulasan (Berdasarkan Like)",
+                                         hover_data=['Ulasan'], color_discrete_map=color_map)
+                fig_scatter.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
+                fig_scatter.update_layout(margin=dict(t=40, b=0, l=0, r=0), showlegend=False)
+                st.plotly_chart(fig_scatter, use_container_width=True)
+            else:
+                st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
         
-        # --- BARIS 2: SCATTER PLOT IMPACT ULASAN ---
-        if 'Rating' in df_viz.columns and 'Jumlah_Like' in df_viz.columns:
-            st.write("### 📍 Impact Ulasan (Berdasarkan Rating & Jumlah Like)")
-            # Mengganti nilai NaN atau null pada Jumlah Like menjadi 0 agar tidak error
-            df_viz['Jumlah_Like'] = df_viz['Jumlah_Like'].fillna(0)
-            
-            fig_scatter = px.scatter(df_viz, x='Rating', y='Jumlah_Like', color='Label_Sentimen',
-                                     color_discrete_map=color_map,
-                                     size_max=15, # Batas ukuran bubble
-                                     hover_data=['Ulasan'],
-                                     title="Sebaran Interaksi Ulasan")
-            
-            # Membuat ukuran titik (bubble) statis agar mirip scatter plot biasa
-            fig_scatter.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')))
-            st.plotly_chart(fig_scatter, use_container_width=True)
-        else:
-            st.info("💡 Grafik *Impact Ulasan* tidak dapat ditampilkan karena kolom 'Rating' atau 'Jumlah_Like' tidak ditemukan dalam file dataset yang diunggah.")
-            
-        st.divider()
-
-        # --- BARIS 3: WORD CLOUD POSITIF & NEGATIF ---
-        st.write("### ☁️ Kata Kunci Dominan (Word Cloud)")
-        col_wc1, col_wc2 = st.columns(2)
+        st.write("---")
+        
+        # --- BARIS 2: 2 WORD CLOUD BERSAMPINGAN ---
+        col4, col5 = st.columns(2)
         
         def buat_wordcloud(teks_gabungan, title, colormap):
             if len(teks_gabungan) > 0:
-                wc = WordCloud(width=800, height=400, background_color='white', colormap=colormap, max_words=100).generate(teks_gabungan)
-                fig, ax = plt.subplots(figsize=(10, 5))
+                wc = WordCloud(width=600, height=300, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
+                fig, ax = plt.subplots(figsize=(8, 4))
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
-                ax.set_title(title, fontsize=20, pad=20)
+                ax.set_title(title, fontsize=18, pad=10)
                 return fig
             return None
 
-        with col_wc1:
-            teks_positif = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
-            fig_wc_pos = buat_wordcloud(teks_positif, "Positif Word Cloud", "Blues") # Colormap Biru
-            if fig_wc_pos:
-                st.pyplot(fig_wc_pos)
-            else:
-                st.write("Tidak cukup kata untuk Positif Word Cloud.")
+        with col4:
+            teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
+            fig_wc_pos = buat_wordcloud(teks_pos, "☁️ Kata Kunci Positif", "Blues")
+            if fig_wc_pos: st.pyplot(fig_wc_pos)
 
-        with col_wc2:
-            teks_negatif = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
-            fig_wc_neg = buat_wordcloud(teks_negatif, "Negatif Word Cloud", "Reds") # Colormap Merah
-            if fig_wc_neg:
-                st.pyplot(fig_wc_neg)
-            else:
-                st.write("Tidak cukup kata untuk Negatif Word Cloud.")
+        with col5:
+            teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
+            fig_wc_neg = buat_wordcloud(teks_neg, "☁️ Kata Kunci Negatif", "Reds")
+            if fig_wc_neg: st.pyplot(fig_wc_neg)
