@@ -286,9 +286,9 @@ with tab3:
             if fig_wc_neg: st.pyplot(fig_wc_neg)
 
         with col6:
-            if 'Tanggal' in df_viz.columns:
+            if 'Tanggal_dan_Jam' in df_viz.columns:
                 # Konversi kolom Tanggal ke Datetime
-                df_viz['Tanggal_DT'] = pd.to_datetime(df_viz['Tanggal'], errors='coerce')
+                df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_danJam'], errors='coerce')
                 
                 # Ekstrak Hari dan Jam
                 hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
