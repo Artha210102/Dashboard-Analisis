@@ -156,7 +156,10 @@ with tab2:
     
     uploaded_file = st.file_uploader("Unggah File (Drag and Drop)", type=['csv', 'xlsx'])
     
-    if uploaded_file is not None:
+    # LOGIKA RESET MEMORI KETIKA FILE KOSONG
+    if uploaded_file is None:
+        st.session_state.df_hasil = None
+    else:
         try:
             if uploaded_file.name.endswith('.csv'):
                 df = pd.read_csv(uploaded_file)
@@ -165,6 +168,8 @@ with tab2:
                 
             if 'Ulasan' not in df.columns:
                 st.error("❌ Akses Ditolak: Kolom 'Ulasan' tidak ditemukan di dalam file.")
+                # LOGIKA RESET MEMORI KETIKA FILE DITOLAK
+                st.session_state.df_hasil = None
             else:
                 st.success(f"✅ File tervalidasi! Menemukan {df.shape[0]} baris ulasan.")
                 if st.button("Mulai Pembersihan & Analisis Massal", type="primary"):
@@ -187,6 +192,8 @@ with tab2:
                     st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
         except Exception as e:
             st.error(f"Terjadi kesalahan teknis: {e}")
+            # LOGIKA RESET MEMORI KETIKA TERJADI ERROR SAAT MEMBACA FILE
+            st.session_state.df_hasil = None
 
 # ==========================================
 # TAB 3: DASHBOARD VISUALISASI EKSKLUSIF
@@ -263,11 +270,11 @@ with tab3:
         st.write("---")
         
         # ==========================================
-        # BARIS 2: Heatmap, Word Cloud Positif, Word Cloud Negatif
+        # BARIS 2: Heatmap (Kiri), Word Cloud Positif (Tengah), Word Cloud Negatif (Kanan)
         # ==========================================
         col4, col5, col6 = st.columns(3)
         
-        # 1. HEATMAP (DIPINDAHKAN KE KOLOM KIRI)
+        # 1. HEATMAP DI KOLOM KIRI
         with col4:
             if 'Tanggal_dan_Jam' in df_viz.columns:
                 df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
@@ -308,14 +315,14 @@ with tab3:
                 return fig
             return None
 
-        # 2. WORD CLOUD POSITIF (DIPINDAHKAN KE KOLOM TENGAH)
+        # 2. WORD CLOUD POSITIF DI KOLOM TENGAH
         with col5:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
             fig_wc_pos = buat_wordcloud(teks_pos, "Kata Kunci Positif", "Blues")
             if fig_wc_pos: 
                 st.pyplot(fig_wc_pos)
 
-        # 3. WORD CLOUD NEGATIF (DIPINDAHKAN KE KOLOM KANAN)
+        # 3. WORD CLOUD NEGATIF DI KOLOM KANAN
         with col6:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
             fig_wc_neg = buat_wordcloud(teks_neg, "Kata Kunci Negatif", "Reds")
