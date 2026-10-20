@@ -181,7 +181,7 @@ with tab2:
                     
                     csv_output = df_bersih.to_csv(index=False).encode('utf-8')
                     st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
-                    st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat visualisasi cantik Anda.")
+                    st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
         except Exception as e:
             st.error(f"Terjadi kesalahan teknis: {e}")
 
