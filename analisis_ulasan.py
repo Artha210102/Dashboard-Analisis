@@ -10,7 +10,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import plotly.express as px
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from sklearn.metrics import confusion_matrix, classification_report # IMPORT BARU UNTUK TAB 4
+from sklearn.metrics import confusion_matrix, classification_report
 
 # --- PENGATURAN HALAMAN ---
 st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
@@ -110,11 +110,12 @@ except Exception as e:
 # --- HEADER APLIKASI ---
 st.markdown('<p class="main-header">🏛️ Dashboard Analisis Sentimen Aplikasi JAKI</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Berbasis Support Vector Machine (SVM) | Oleh: Artha Nugraha</p>', unsafe_allow_html=True)
+
 if 'df_hasil' not in st.session_state:
     st.session_state.df_hasil = None
 
 # --- TAB NAVIGASI ---
-tab1, tab2, tab3, tab4 = st.tabs(["💬 Analisis Teks Tunggal", "📁 Pemrosesan Massal", "📊 Dashboard Visualisasi", "📈 Evaluasi Model (Confusion Matrix)"])
+tab1, tab2, tab3, tab4 = st.tabs(["💬 Analisis Teks Tunggal", "📁 Pemrosesan Massal", "📊 Dashboard Visualisasi", "📈 Evaluasi Model"])
 
 # ==========================================
 # TAB 1: ANALISIS TEKS TUNGGAL
@@ -160,7 +161,6 @@ with tab2:
             else:
                 df = pd.read_excel(uploaded_file)
             
-            # 1. FLEKSIBILITAS NAMA KOLOM
             kandidat_kolom = ['ulasan', 'review', 'reviews', 'komentar', 'comment', 'text', 'content']
             kolom_terpilih = None
             
@@ -175,9 +175,7 @@ with tab2:
             else:
                 df = df.rename(columns={kolom_terpilih: 'Ulasan'})
                 
-                # 2. VALIDASI KONTEKS BERLAPIS (KEYWORD HEURISTICS)
                 teks_gabungan = " ".join(df['Ulasan'].dropna().astype(str).tolist()).lower()
-                
                 kw_utama = ['jaki', 'jakarta kini', 'pemprov dki', 'dki jakarta', 'beritajakarta']
                 kw_fitur = ['jaklapor', 'jakpantau', 'jakwifi', 'jakwarta', 'jakrespon', 'kelurahan', 'kecamatan', 'rt/rw', 'lapor', 'crm', 'posyandu', 'pbb']
                 
@@ -214,7 +212,6 @@ with tab2:
                             status.update(label="Pemrosesan Selesai!", state="complete", expanded=False)
                         
                         with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
-                            # MENGUBAH INDEKS TABEL MULAI DARI 1 BUKAN 0
                             df_display = df_bersih.head(10).copy()
                             df_display.index = np.arange(1, len(df_display) + 1)
                             st.dataframe(df_display, use_container_width=True)
@@ -239,7 +236,6 @@ with tab3:
         jml_positif = len(df_viz[df_viz['Label_Sentimen'] == 'Positif'])
         jml_negatif = len(df_viz[df_viz['Label_Sentimen'] == 'Negatif'])
         
-        # --- KARTU METRIK HTML/CSS CUSTOM ---
         st.markdown(f"""
         <div class="kpi-container">
             <div class="kpi-card kpi-total">
@@ -260,9 +256,6 @@ with tab3:
         st.write("---")
         color_map = {'Positif':'#4E79A7', 'Negatif':'#E15759'}
         
-        # ==========================================
-        # BARIS 1: 3 CHART BERSAMPINGAN
-        # ==========================================
         col1, col2, col3 = st.columns(3)
         sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
         sentimen_counts.columns = ['Sentimen', 'Jumlah']
@@ -300,10 +293,6 @@ with tab3:
                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
         
         st.write("---")
-        
-        # ==========================================
-        # BARIS 2: Heatmap, Word Cloud Positif, Word Cloud Negatif
-        # ==========================================
         col4, col5, col6 = st.columns(3)
         
         with col4:
@@ -349,90 +338,85 @@ with tab3:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
             fig_wc_pos = buat_wordcloud(teks_pos, "Kata Kunci Positif", "Blues")
             if fig_wc_pos: 
-                # DITAMBAHKAN USE_CONTAINER_WIDTH AGAR RESPONSIVE MENGIKUTI ZOOM
-                st.pyplot(fig_wc_pos, use_container_width=True) 
+                st.pyplot(fig_wc_pos, use_container_width=True)
 
         with col6:
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
             fig_wc_neg = buat_wordcloud(teks_neg, "Kata Kunci Negatif", "Reds")
             if fig_wc_neg: 
-                # DITAMBAHKAN USE_CONTAINER_WIDTH AGAR RESPONSIVE MENGIKUTI ZOOM
-                st.pyplot(fig_wc_neg, use_container_width=True) 
+                st.pyplot(fig_wc_neg, use_container_width=True)
 
 
 # ==========================================
-# TAB 4: EVALUASI MODEL (CONFUSION MATRIX) - BARU
+# TAB 4: EVALUASI MODEL (CONFUSION MATRIX)
 # ==========================================
 with tab4:
     if st.session_state.df_hasil is None:
         st.warning("⚠️ Silakan unggah dan proses data di **Tab 2** terlebih dahulu.")
     else:
         st.subheader("Evaluasi Performa Model")
-        df_eval = st.session_state.df_hasil.copy()
-
-        # Mencari kolom yang bisa dijadikan Ground Truth (Nilai Aktual) seperti Rating atau Bintang
-        kolom_rating = None
-        for col in df_eval.columns:
-            if str(col).strip().lower() in ['rating', 'bintang', 'score', 'star']:
-                kolom_rating = col
-                break
+        st.info("💡 **Konsep Evaluasi:** Untuk menghitung Akurasi dan *Confusion Matrix*, sistem butuh membandingkan **Tebakan Sistem (Prediksi Model)** dengan **Kunci Jawaban (Nilai Aktual/Manual)**.")
         
-        if kolom_rating is None:
-            st.info("💡 **Informasi Sistem:** Untuk membuat *Confusion Matrix* dan mengukur Akurasi, sistem membutuhkan nilai kebenaran aktual (Ground Truth). Silakan unggah data yang memiliki kolom **'Rating'** atau **'Bintang'** agar sistem bisa membandingkannya dengan Prediksi Model.")
-        else:
-            st.write(f"Menggunakan kolom **{kolom_rating}** sebagai acuan nilai aktual (Ground Truth).")
-            st.caption("*Asumsi konversi: Rating 4 & 5 dianggap **Positif**, Rating 1, 2, & 3 dianggap **Negatif**.*")
-            
-            # Konversi nilai Rating menjadi Label Kategorikal
-            df_eval['Rating_Numeric'] = pd.to_numeric(df_eval[kolom_rating], errors='coerce')
-            df_eval = df_eval.dropna(subset=['Rating_Numeric'])
-            
-            def rating_to_label(rating):
-                if rating >= 4:
-                    return 'Positif'
-                else:
-                    return 'Negatif'
-            
-            df_eval['Label_Aktual'] = df_eval['Rating_Numeric'].apply(rating_to_label)
-            
-            # Variabel Evaluasi
-            y_true = df_eval['Label_Aktual']
+        df_eval = st.session_state.df_hasil.copy()
+        
+        # Kolom yang tidak masuk akal untuk dijadikan Ground Truth
+        kolom_dikecualikan = ['Label_Sentimen', 'Ulasan_Bersih', 'Ulasan']
+        opsi_kolom = [col for col in df_eval.columns if col not in kolom_dikecualikan]
+
+        st.markdown("Jika dataset Anda memiliki kolom **Label Manual** atau **Rating Bintang**, silakan pilih di bawah ini untuk melihat evaluasinya:")
+        
+        # DROPDOWN PILIHAN KUNCI JAWABAN (GROUND TRUTH)
+        kolom_ground_truth = st.selectbox(
+            "Pilih Kolom Kunci Jawaban (Ground Truth):",
+            ["-- Pilih Kolom --"] + opsi_kolom
+        )
+
+        if kolom_ground_truth != "-- Pilih Kolom --":
             y_pred = df_eval['Label_Sentimen']
             
-            # Membagi layout Tab 4
-            col_eval1, col_eval2 = st.columns(2)
-            
-            with col_eval1:
-                st.markdown("#### Confusion Matrix Heatmap")
-                # Membuat matriks
-                cm = confusion_matrix(y_true, y_pred, labels=['Positif', 'Negatif'])
+            # CEK APAKAH KOLOM YANG DIPILIH ANGKA (RATING) ATAU TEKS
+            if pd.api.types.is_numeric_dtype(df_eval[kolom_ground_truth]):
+                st.caption(f"ℹ️ *Sistem mendeteksi kolom **'{kolom_ground_truth}'** berisi Angka/Rating. Otomatis dikonversi: Bintang >= 4 (Positif), <= 3 (Negatif).*")
+                df_eval['y_true_temp'] = pd.to_numeric(df_eval[kolom_ground_truth], errors='coerce').apply(
+                    lambda x: 'Positif' if x >= 4 else 'Negatif'
+                )
+            else:
+                st.caption(f"ℹ️ *Sistem menggunakan kolom teks **'{kolom_ground_truth}'** sebagai acuan jawaban.*")
+                df_eval['y_true_temp'] = df_eval[kolom_ground_truth].astype(str).str.strip().str.title()
+                # Menyamakan format jika ada yang menulis Positive / Negative dari bahasa Inggris
+                df_eval['y_true_temp'] = df_eval['y_true_temp'].replace({'Positive': 'Positif', 'Negative': 'Negatif'})
+
+            y_true = df_eval['y_true_temp']
+            labels_urut = ['Positif', 'Negatif']
+
+            # PASTIKAN KOLOM YANG DIPILIH HANYA MENGANDUNG KATA POSITIF / NEGATIF SETELAH DIKONVERSI
+            if set(y_true.unique()).issubset(set(labels_urut)):
+                col_eval1, col_eval2 = st.columns(2)
                 
-                # Visualisasi dengan Plotly
-                fig_cm = px.imshow(cm, 
-                                   labels=dict(x="Prediksi Model (SVM)", y="Kenyataan Aktual (Dari Rating)", color="Jumlah Data"),
-                                   x=['Positif', 'Negatif'], 
-                                   y=['Positif', 'Negatif'],
-                                   text_auto=True,
-                                   color_continuous_scale='Blues')
-                fig_cm.update_xaxes(side="bottom")
-                fig_cm.update_layout(margin=dict(t=30, l=10, r=10, b=10))
-                st.plotly_chart(fig_cm, use_container_width=True)
-                
-            with col_eval2:
-                st.markdown("#### Classification Report")
-                # Menghitung metrik (Precision, Recall, F1, Support)
-                report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
-                
-                # Mengambil nilai akurasi terpisah agar tabel rapi
-                akurasi = report.pop('accuracy')
-                
-                # Membuat DataFrame untuk tabel laporan
-                df_report = pd.DataFrame(report).transpose()
-                df_report[['precision', 'recall', 'f1-score']] = df_report[['precision', 'recall', 'f1-score']].round(3)
-                df_report['support'] = df_report['support'].astype(int)
-                
-                # Menampilkan metrik
-                st.dataframe(df_report, use_container_width=True)
-                
-                # Menampilkan Akurasi dengan Highlight
-                st.success(f"🎯 **Tingkat Akurasi Model (Accuracy): {akurasi * 100:.2f}%**")
+                with col_eval1:
+                    st.markdown("#### Confusion Matrix Heatmap")
+                    cm = confusion_matrix(y_true, y_pred, labels=labels_urut)
+                    
+                    fig_cm = px.imshow(cm, 
+                                       labels=dict(x="Prediksi Model (Label_Sentimen)", y=f"Kunci Jawaban Asli ({kolom_ground_truth})", color="Jumlah"),
+                                       x=labels_urut, 
+                                       y=labels_urut,
+                                       text_auto=True,
+                                       color_continuous_scale='Blues')
+                    fig_cm.update_xaxes(side="bottom")
+                    fig_cm.update_layout(margin=dict(t=30, l=10, r=10, b=10))
+                    st.plotly_chart(fig_cm, use_container_width=True)
+                    
+                with col_eval2:
+                    st.markdown("#### Classification Report")
+                    report = classification_report(y_true, y_pred, output_dict=True, labels=labels_urut, zero_division=0)
+                    
+                    akurasi = report.pop('accuracy')
+                    df_report = pd.DataFrame(report).transpose()
+                    df_report[['precision', 'recall', 'f1-score']] = df_report[['precision', 'recall', 'f1-score']].round(3)
+                    df_report['support'] = df_report['support'].astype(int)
+                    
+                    st.dataframe(df_report, use_container_width=True)
+                    st.success(f"🎯 **Tingkat Akurasi Model terhadap {kolom_ground_truth}: {akurasi * 100:.2f}%**")
+            else:
+                st.error(f"❌ Kolom '{kolom_ground_truth}' berisi format yang tidak didukung untuk evaluasi Sentimen (misal nama orang, tanggal, dll). Silakan pilih kolom yang berisi nilai manual sentimen atau rating.")
