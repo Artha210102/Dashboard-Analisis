@@ -11,68 +11,131 @@ import plotly.express as px
 from wordcloud import WordCloud
 
 # --- PENGATURAN HALAMAN ---
-st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
+st.set_page_config(page_title="JAKIvision | Analisis Sentimen", page_icon="🏛️", layout="wide")
 
-# --- CUSTOM CSS LANJUTAN ---
+# --- CUSTOM CSS LANJUTAN (UI MODERN SEPERTI DESAIN TARGET) ---
 st.markdown("""
     <style>
-    .main-header {font-size: 2.5rem; color: #1E3A8A; text-align: center; font-weight: bold;}
-    .sub-header {text-align: center; color: #6B7280; margin-bottom: 30px;}
-    .success-box {padding: 15px; border-radius: 10px; background-color: #D1FAE5; border-left: 5px solid #059669; margin-top: 10px;}
-    .error-box {padding: 15px; border-radius: 10px; background-color: #FEE2E2; border-left: 5px solid #DC2626; margin-top: 10px;}
+    /* Background Dotted pattern */
+    .stApp {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#cbd5e1 1px, transparent 0);
+        background-size: 20px 20px;
+    }
     
+    /* Font & Text Overrides */
+    h1, h2, h3, p, span, div {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Top Dark Banner */
+    .dark-banner {
+        background-color: #0B1120;
+        color: #94A3B8;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .dark-banner-badge {
+        background-color: #1E3A8A;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-right: 15px;
+    }
+    .dark-banner strong { color: #F8FAFC; }
+
+    /* Nav Bar Header */
+    .nav-header {
+        background-color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        border: 1px solid #E2E8F0;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+    .nav-logo-box { background-color: #0F172A; color: white; padding: 5px 12px; border-radius: 6px; font-weight: bold; margin-right: 10px;}
+    .nav-title { font-size: 1.2rem; font-weight: 800; color: #0F172A; margin-right: 10px; }
+    .nav-version { background-color: #F1F5F9; color: #64748B; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;}
+
+    /* Section Titles */
+    .section-subtitle { font-size: 0.75rem; font-weight: 700; color: #3B82F6; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;}
+    .section-title { font-size: 1.8rem; font-weight: 800; color: #0F172A; margin-bottom: 5px; margin-top: 0;}
+    .section-desc { color: #64748B; font-size: 0.95rem; margin-bottom: 25px; }
+
+    /* Panel Styling */
+    .panel-box {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+    .panel-header {
+        background-color: #0F172A;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Result Boxes */
+    .success-box {padding: 15px; border-radius: 8px; background-color: #4C1D95; color: white; margin-top: 15px; text-align: center;}
+    .error-box {padding: 15px; border-radius: 8px; background-color: #7F1D1D; color: white; margin-top: 15px; text-align: center;}
+    .result-text { font-size: 1.2rem; font-weight: bold; margin:0;}
+    .result-sub { font-size: 0.85rem; opacity: 0.8; margin:0;}
+
     /* Styling Custom KPI Cards */
-    .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
-    .kpi-card {flex: 1; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); text-align: center;}
+    .kpi-container {display: flex; gap: 20px; margin-bottom: 25px;}
+    .kpi-card {flex: 1; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: white;}
+    .kpi-total { border-left: 6px solid #64748B; }
+    .kpi-positif { border-left: 6px solid #3B82F6; }
+    .kpi-negatif { border-left: 6px solid #EF4444; }
+    .kpi-title {font-size: 0.85rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin: 0 0 10px 0;}
+    .kpi-value {font-size: 2.2rem; font-weight: 800; color: #0F172A; margin: 0;}
     
-    /* MENAMBAHKAN GARIS ABU TERANG DI KIRI CARD TOTAL */
-    .kpi-total {background-color: #f8f9fa; border: 1px solid #e0e0e0; border-left: 6px solid #adb5bd;}
-    
-    .kpi-positif {background-color: #F0F4FA; border-left: 6px solid #4E79A7;}
-    .kpi-negatif {background-color: #FDF0F0; border-left: 6px solid #E15759;}
-    .kpi-title {font-size: 1.1rem; font-weight: 600; margin: 0; padding-bottom: 5px;}
-    .kpi-value {font-size: 2.5rem; font-weight: bold; margin: 0;}
+    /* Hide default Streamlit elements for cleaner UI */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
-# --- FUNGSI INISIALISASI SASTRAWI & NLTK ---
+# --- FUNGSI INISIALISASI SASTRAWI & NLTK (Tetap Sama) ---
 @st.cache_resource
 def load_text_processor():
     try:
         nltk.download('stopwords', quiet=True)
     except:
         pass
-        
     factory = StemmerFactory()
     stemmer = factory.create_stemmer()
-    
     list_stopwords = stopwords.words('indonesian')
     kata_negasi_baku = ['tidak', 'bukan', 'belum', 'jangan']
     list_stopwords = [kata for kata in list_stopwords if kata not in kata_negasi_baku]
-    
-    kata_tambahan = ['yg', 'dg', 'rt', 'dgn', 'ny', 'd', 'klo', 'kalo', 'amp', 'biar',
-                     'bikin', 'bilang', 'krn', 'nya', 'nih', 'sih', 'si', 'tau', 'tuh',
-                     'utk', 'ya', 'jd', 'sdh', 'aja', 'n', 't', 'nyg', 'hehe', 'pen',
-                     'u', 'nan', 'loh', 'pas', 'sgt', 'sngt', 'y', 'bgt', 'banget', 'deh']
+    kata_tambahan = ['yg', 'dg', 'rt', 'dgn', 'ny', 'd', 'klo', 'kalo', 'amp', 'biar', 'bikin', 'bilang', 'krn', 'nya', 'nih', 'sih', 'si', 'tau', 'tuh', 'utk', 'ya', 'jd', 'sdh', 'aja', 'n', 't', 'nyg', 'hehe', 'pen', 'u', 'nan', 'loh', 'pas', 'sgt', 'sngt', 'y', 'bgt', 'banget', 'deh']
     list_stopwords.extend(kata_tambahan)
-    
     return stemmer, list_stopwords
+
 stemmer, list_stopwords = load_text_processor()
 
-# Kamus Normalisasi
+# Kamus Normalisasi (Tetap Sama)
 kamus_normalisasi = {
-    'ga': 'tidak', 'gak': 'tidak', 'enggak': 'tidak', 'ngga': 'tidak',
-    'nggak': 'tidak', 'gk': 'tidak', 'g': 'tidak', 'tdk': 'tidak', 'ndak': 'tidak',
-    'jgn': 'jangan', 'blm': 'belum', 'bkn': 'bukan',
-    'lemot': 'lambat', 'lmot': 'lambat','lelet': 'lambat',
-    'ngelag': 'lambat', 'ngeleg': 'lambat', 'lag': 'lambat',
-    'error': 'rusak', 'eror': 'rusak','cacat': 'rusak',
-    'bug': 'rusak','blank': 'rusak',
-    'bagus': 'bagus', 'goks': 'bagus', 'gokil': 'bagus', 'keren': 'bagus',
-    'oon': 'bodoh', 'gblk': 'bodoh', 'bego': 'bodoh', 'tolol': 'bodoh', 'jelek': 'buruk', 'cemen': 'buruk'
+    'ga': 'tidak', 'gak': 'tidak', 'enggak': 'tidak', 'ngga': 'tidak', 'nggak': 'tidak', 'gk': 'tidak', 'g': 'tidak', 'tdk': 'tidak', 'ndak': 'tidak', 'jgn': 'jangan', 'blm': 'belum', 'bkn': 'bukan', 'lemot': 'lambat', 'lmot': 'lambat','lelet': 'lambat', 'ngelag': 'lambat', 'ngeleg': 'lambat', 'lag': 'lambat', 'error': 'rusak', 'eror': 'rusak','cacat': 'rusak', 'bug': 'rusak','blank': 'rusak', 'bagus': 'bagus', 'goks': 'bagus', 'gokil': 'bagus', 'keren': 'bagus', 'oon': 'bodoh', 'gblk': 'bodoh', 'bego': 'bodoh', 'tolol': 'bodoh', 'jelek': 'buruk', 'cemen': 'buruk'
 }
 
-# --- FUNGSI PEMBERSIHAN TEKS ---
+# --- FUNGSI PEMBERSIHAN TEKS (Tetap Sama) ---
 def pembersihan_teks(text):
     text = str(text).lower()
     text = re.sub(r'([a-zA-Z])\1+', r'\1', text)
@@ -93,268 +156,346 @@ def pembersihan_teks(text):
                 kata_bersih.append(kata_dasar)
     return " ".join(kata_bersih)
 
-# --- FUNGSI LOAD MODEL ---
+# --- FUNGSI LOAD MODEL (Tetap Sama) ---
 @st.cache_resource
 def load_models():
     model = joblib.load('model_svm_jaki.pkl')
     vectorizer = joblib.load('tfidf_jaki.pkl')
     return model, vectorizer
+
 try:
     svm_model, tfidf_vect = load_models()
 except Exception as e:
     st.error("Gagal memuat file .pkl. Pastikan model_svm_jaki.pkl dan tfidf_jaki.pkl ada di folder ini!")
     st.stop()
 
+# --- HEADER APLIKASI (UI BARU) ---
+st.markdown("""
+<div class="dark-banner">
+    <div class="dark-banner-badge">Penelitian Ilmiah</div>
+    <div>Arsitektur Klasifikasi Sentimen Ulasan Layanan Publik JAKI (Sastrawi + TF-IDF + Support Vector Machine) &Berikut adalah kode lengkap yang telah dirombak untuk merapikan UI Anda agar semirip mungkin dengan target desain pada gambar referensi. 
+
+Perubahan utama yang dilakukan:
+1.  **Latar Belakang & Tipografi:** Menambahkan *dot-grid background* (motif titik-titik) dan styling font yang lebih modern.
+2.  **Banner Header Kustom:** Mengganti header teks biasa dengan elemen HTML/CSS khusus yang menyerupai *dark mode banner* dengan badge/tag (seperti pada gambar referensi).
+3.  **Layout Tab 1 (Analisis Tunggal):** Membagi antarmuka menjadi 2 kolom (Kiri untuk Input, Kanan untuk Output) dan menambahkan *Galeri Sampel Ulasan* menggunakan mekanisme `st.session_state`.
+4.  **Layout Tab 2 (Pemrosesan Massal):** Membagi antarmuka menjadi 2 kolom (Kiri untuk Upload, Kanan untuk panduan Mekanisme Validasi Dataset).
+5.  **Styling Komponen:** Menambahkan container khusus dengan border, bayangan halus (*subtle shadow*), dan header berlatar belakang gelap untuk setiap panel.
+
+Silakan salin dan ganti seluruh kode Anda dengan kode di bawah ini:
+
+```python
+import streamlit as st
+import pandas as pd
+import numpy as np
+import re
+import joblib
+import nltk
+import textwrap
+from nltk.corpus import stopwords
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+import plotly.express as px
+from wordcloud import WordCloud
+
+# --- PENGATURAN HALAMAN ---
+st.set_page_config(page_title="JAKIvision | Analisis Sentimen", page_icon="🏛️", layout="wide")
+
+# --- CUSTOM CSS LANJUTAN ---
+st.markdown("""
+    <style>
+    /* Dot Grid Background */
+    .stApp {
+        background-color: #ffffff;
+        background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+    
+    /* Custom Top Banner */
+    .top-banner-container {
+        background-color: #0B1120;
+        border-radius: 12px;
+        padding: 20px 30px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .badge-blue {
+        background-color: #1E3A8A;
+        color: #93C5FD;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-right: 10px;
+        border: 1px solid #2563EB;
+    }
+    .banner-text-small { font-size: 0.85rem; color: #9CA3AF; margin-left: 10px;}
+    .brand-title {
+        font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; margin-top: 15px;
+    }
+    .jaki-logo { background-color: white; color: #0B1120; padding: 2px 8px; border-radius: 6px; margin-right: 10px; font-weight: 900;}
+    
+    /* Section Headers */
+    .section-title { font-size: 2rem; font-weight: bold; color: #111827; margin-bottom: 5px; }
+    .section-subtitle { font-size: 1rem; color: #6B7280; margin-bottom: 30px; }
+    
+    /* Custom Panels */
+    .panel-header {
+        background-color: #0B1120; color: white; padding: 8px 15px; 
+        border-top-left-radius: 8px; border-top-right-radius: 8px;
+        font-weight: bold; font-size: 0.9rem; letter-spacing: 1px;
+    }
+    .panel-body {
+        background-color: #ffffff; border: 1px solid #E5E7EB; border-top: none;
+        border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+        padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 250px;
+    }
+    
+    /* Result Boxes */
+    .result-box-neg { background-color: #1E1B4B; border: 1px solid #3730A3; padding: 15px; border-radius: 8px; color: white; margin-top:15px; }
+    .result-box-pos { background-color: #064E3B; border: 1px solid #065F46; padding: 15px; border-radius: 8px; color: white; margin-top:15px; }
+    
+    /* Styling Custom KPI Cards */
+    .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
+    .kpi-card {flex: 1; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; background-color: white; border: 1px solid #f3f4f6;}
+    .kpi-total {border-left: 6px solid #64748b;}
+    .kpi-positif {border-left: 6px solid #3b82f6;}
+    .kpi-negatif {border-left: 6px solid #ef4444;}
+    .kpi-title {font-size: 1.1rem; font-weight: 600; margin: 0; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;}
+    .kpi-value {font-size: 2.5rem; font-weight: bold; margin: 0;}
+    </style>
+""", unsafe_allow_html=True)
+
+# --- FUNGSI INISIALISASI SASTRAWI & NLTK ---
+@st.cache_resource
+def load_text_processor():
+    try:
+        nltk.download('stopwords', quiet=True)
+    except:
+        pass
+    factory = StemmerFactory()
+    stemmer = factory.create_stemmer()
+    list_stopwords = stopwords.words('indonesian')
+    kata_negasi_baku = ['tidak', 'bukan', 'belum', 'jangan']
+    list_stopwords = [kata for kata in list_stopwords if kata not in kata_negasi_baku]
+    kata_tambahan = ['yg', 'dg', 'rt', 'dgn', 'ny', 'd', 'klo', 'kalo', 'amp', 'biar', 'bikin', 'bilang', 'krn', 'nya', 'nih', 'sih', 'si', 'tau', 'tuh', 'utk', 'ya', 'jd', 'sdh', 'aja', 'n', 't', 'nyg', 'hehe', 'pen', 'u', 'nan', 'loh', 'pas', 'sgt', 'sngt', 'y', 'bgt', 'banget', 'deh']
+    list_stopwords.extend(kata_tambahan)
+    return stemmer, list_stopwords
+
+stemmer, list_stopwords = load_text_processor()
+
+kamus_normalisasi = {
+    'ga': 'tidak', 'gak': 'tidak', 'enggak': 'tidak', 'ngga': 'tidak', 'nggak': 'tidak', 'gk': 'tidak', 'g': 'tidak', 'tdk': 'tidak', 'ndak': 'tidak', 'jgn': 'jangan', 'blm': 'belum', 'bkn': 'bukan', 'lemot': 'lambat', 'lmot': 'lambat','lelet': 'lambat', 'ngelag': 'lambat', 'ngeleg': 'lambat', 'lag': 'lambat', 'error': 'rusak', 'eror': 'rusak','cacat': 'rusak', 'bug': 'rusak','blank': 'rusak', 'bagus': 'bagus', 'goks': 'bagus', 'gokil': 'bagus', 'keren': 'bagus', 'oon': 'bodoh', 'gblk': 'bodTentu, saya bisa membantu merapikan UI Streamlit Anda agar lebih mirip dengan gambar referensi awal yang memiliki desain lebih elegan dan terstruktur (seperti yang terlihat pada `image_5e75e1.jpg` hingga `image_5ecc9a.jpg`), dibandingkan dengan tampilan default Streamlit pada kode Anda saat ini (`image_5ed362.jpg` dkk).
+
+Berdasarkan gambar referensi, UI yang Anda inginkan memiliki elemen-elemen berikut yang perlu ditambahkan/dimodifikasi dalam kode Anda:
+
+1.  **Header dengan Background Gelap:** Header utama tidak hanya teks, tetapi dibungkus dalam *container* berwarna biru gelap dengan sudut melengkung.
+2.  **Badge/Tag di Header:** Ada badge seperti "Penelitian Ilmiah", "Metode: Linear SVM", dll.
+3.  **Navigasi Kustom (Bukan Tab Bawaan Streamlit):** Gambar referensi menggunakan semacam tombol navigasi horizontal ("Ringkasan", "Pemrosesan CSV", "Visualisasi Data", dll) alih-alih `st.tabs` bawaan yang terlihat pada kode Anda.
+4.  **Layout Card yang Lebih Elegan:** Kartu untuk "Analisis Sentimen Ulasan Layanan Publik" dan "Klasifikasi Margin Hyperplane SVM" memiliki *shadow* dan *border-radius* yang jelas, serta penataan teks yang lebih rapi (menggunakan font sans-serif modern).
+5.  **Kotak Input & Hasil (Terminal Style):** Pada bagian "Analisis Teks Tunggal", kotak input dan hasil prediksi digayakan seperti *terminal* atau *code block* berwarna biru tua dengan teks monospaced.
+6.  **Card Metrik Bawah:** Terdapat tiga kartu metrik kecil di bawah ("4,075 Dimensi Kosakata", "Linear Kernel", dll) yang sejajar rata.
+
+**Pendekatan untuk Memperbaiki UI di Streamlit:**
+
+Mengingat keterbatasan kustomisasi UI bawaan Streamlit, Anda perlu sangat bergantung pada injeksi CSS dan HTML melalui `st.markdown(..., unsafe_allow_html=True)`.
+
+Berikut adalah panduan dan potongan kode untuk merapikan UI Anda menuju desain yang diinginkan:
+
+### 1. Perbaiki Header & Navigasi
+
+Ganti bagian header di kode Anda dengan blok HTML/CSS yang meniru tampilan gelap. Untuk navigasi, Anda bisa menggunakan `st.radio` horizontal (atau komponen *third-party* seperti `streamlit-option-menu`, tetapi mari gunakan CSS dasar dulu agar simpel).
+
+```python
+# --- CUSTOM CSS UNTUK HEADER & CARD ---
+st.markdown("""
+    <style>
+    /* Hilangkan padding default top */
+    .block-container { padding-top: 2rem; }
+
+    /* Header Gelap */
+    .dark-header {
+        background-color: #0B192C; /* Warna biru gelap */
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .badge {
+        background-color: rgba(255,255,255,0.1);
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .header-logo { font-weight: bold; font-size: 1.2rem; }
+    
+    /* Layout Utama */
+    .content-card {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .section-title {
+        color: #1f2937;
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+    .section-subtitle {
+        color: #6Untuk mengubah UI Anda agar sesuai dengan desain yang lebih modern dan profesional seperti pada referensi gambar awal (dengan latar belakang pola titik-titik, banner biru gelap, dan tab berbentuk *pill button*), kita perlu memaksimalkan penggunaan custom CSS pada Streamlit.
+
+Berikut adalah pembaruan pada bagian **PENGATURAN HALAMAN**, **CUSTOM CSS**, dan **HEADER APLIKASI** yang bisa langsung Anda *copy-paste* untuk menggantikan bagian atas kode Anda. Bagian logika pemrosesan data (Python) tetap sama.
+
+### 1. Update Bagian CSS dan Header
+
+Ganti bagian kode dari `# --- PENGATURAN HALAMAN ---` sampai `# --- HEADER APLIKASI ---` dengan kode berikut:
+
+```python
+# --- PENGATURAN HALAMAN ---
+st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
+
+# --- CUSTOM CSS LANJUTAN ---
+st.markdown("""
+    <style>
+    /* Latar Belakang Dotted (Titik-titik) */
+    .stApp {
+        background-color: #f8f9fa;
+        background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+    
+    /* Styling Top Banner Gelap */
+    .top-banner {
+        background-color: #0F172A;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-family: sans-serif;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .badge-ilmiah {
+        background-color: #1E3A8A;
+        color: #60A5FA;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid #3B82F6;
+    }
+    .banner-text {
+        color: #94A3B8;
+        font-size: 0.9rem;
+    }
+
+    /* Styling Header Title */
+    .main-logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .logo-box {
+        background-color: #0F172A;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .title-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+    }
+    .version-badge {
+        background-color: #F3F4F6;
+        color: #6B7280;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        border: 1px solid #E5E7EB;
+    }
+
+    /* Modifikasi Tampilan Tab Bawaan Streamlit Menjadi Button */
+    div[data-baseweb="tab-list"] {
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    div[data-baseweb="tab"] {
+        background-color: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 10px 20px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        color: #4B5563;
+        font-weight: 600;
+    }
+    div[data-baseweb="tab"][aria-selected="true"] {
+        background-color: #0F172A; /* Warna biru gelap / hitam */
+        color: white !important;
+        border-color: #0F172A;
+    }
+    /* Sembunyikan garis merah bawaan tab Streamlit */
+    div[data-baseweb="tab-highlight"] {
+        display: none;
+    }
+    div[data-baseweb="tab-border"] {
+        display: none;
+    }
+
+    /* Container Putih untuk Konten */
+    .content-box {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #F3F4F6;
+        margin-bottom: 20px;
+    }
+
+    /* Alert Boxes */
+    .success-box {padding: 15px; border-radius: 8px; background-color: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; margin-top: 10px;}
+    .error-box {padding: 15px; border-radius: 8px; background-color: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; margin-top: 10px;}
+    
+    /* KPI Cards */
+    .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
+    .kpi-card {flex: 1; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; background-color: white;}
+    .kpi-total {border-top: 4px solid #6B7280;}
+    .kpi-positif {border-top: 4px solid #3B82F6;}
+    .kpi-negatif {border-top: 4px solid #EF4444;}
+    .kpi-title {font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;}
+    .kpi-value {font-size: 2.2rem; font-weight: bold; margin: 0;}
+    </style>
+""", unsafe_allow_html=True)
+
 # --- HEADER APLIKASI ---
-st.markdown('<p class="main-header">🏛️ Dashboard Analisis Sentimen Aplikasi JAKI</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Berbasis Support Vector Machine (SVM) | Oleh: Artha Nugraha</p>', unsafe_allow_html=True)
+st.markdown("""
+    <div class="top-banner">
+        <span class="badge-ilmiah">• Penelitian Ilmiah</span>
+        <span class="banner-text">Arsitektur Klasifikasi Sentimen Ulasan Layanan Publik JAKI (Sastrawi + TF-IDF + Support Vector Machine)</span>
+    </div>
+    
+    <div class="main-logo-container">
+        <div class="logo-box">JAKI</div>
+        <h1 class="title-text">JAKIVision</h1>
+        <span class="version-badge">v1.0 SVM</span>
+    </div>
+""", unsafe_allow_html=True)
 
 if 'df_hasil' not in st.session_state:
     st.session_state.df_hasil = None
 
 # --- TAB NAVIGASI ---
-tab1, tab2, tab3 = st.tabs(["💬 Analisis Teks Tunggal", "📁 Pemrosesan Massal", "📊 Dashboard Visualisasi"])
-
-# ==========================================
-# TAB 1: ANALISIS TEKS TUNGGAL
-# ==========================================
-with tab1:
-    st.subheader("Cek Ulasan Spesifik")
-    user_input = st.text_area("Ketik keluhan atau ulasan secara manual:", placeholder="Contoh: Aplikasi JAKI lemot banget pas mau daftar vaksin, tolong diperbaiki!")
-    
-    if st.button("Prediksi Sentimen", type="primary"):
-        if user_input.strip() == "":
-            st.warning("Mohon masukkan teks ulasan terlebih dahulu!")
-        else:
-            with st.spinner('Menganalisis teks...'):
-                teks_bersih = pembersihan_teks(user_input)
-                teks_vektor = tfidf_vect.transform([teks_bersih])
-                prediction = svm_model.predict(teks_vektor)[0]
-                jarak_margin = svm_model.decision_function(teks_vektor)[0]
-                probabilitas = 1 / (1 + np.exp(-jarak_margin))
-                keyakinan = probabilitas if probabilitas > 0.5 else (1 - probabilitas)
-                persentase_yakin = round(keyakinan * 100, 1)
-                
-                st.write(f"**Teks setelah dibersihkan (Sastrawi):** *{teks_bersih}*")
-                if prediction == 'Positif':
-                    st.markdown(f'<div class="success-box"><h3>🔵 Sentimen POSITIF (Tingkat Keyakinan: {persentase_yakin}%)</h3></div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="error-box"><h3>🔴 Sentimen NEGATIF (Tingkat Keyakinan: {persentase_yakin}%)</h3></div>', unsafe_allow_html=True)
-
-# ==========================================
-# TAB 2: PEMROSESAN MASSAL
-# ==========================================
-with tab2:
-    st.subheader("Unggah Data Ulasan Baru")
-    st.info("⚠️ **Catatan Sistem:** Unggah file CSV/Excel hasil scraping dengan kolom ulasan ('Ulasan', 'Review', 'Komentar', atau 'Text').")
-    
-    uploaded_file = st.file_uploader("Unggah File (Drag and Drop)", type=['csv', 'xlsx'])
-    
-    if uploaded_file is None:
-        st.session_state.df_hasil = None
-    else:
-        try:
-            if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file)
-            else:
-                df = pd.read_excel(uploaded_file)
-            
-            kandidat_kolom = ['ulasan', 'review', 'reviews', 'komentar', 'comment', 'text', 'content']
-            kolom_terpilih = None
-            
-            for col in df.columns:
-                if str(col).strip().lower() in kandidat_kolom:
-                    kolom_terpilih = col
-                    break
-            
-            if kolom_terpilih is None:
-                st.error("❌ Akses Ditolak: Kolom ulasan tidak ditemukan. Harap gunakan kolom bernama 'Ulasan', 'Review', 'Komentar', atau 'Text'.")
-                st.session_state.df_hasil = None
-            else:
-                df = df.rename(columns={kolom_terpilih: 'Ulasan'})
-                
-                teks_gabungan = " ".join(df['Ulasan'].dropna().astype(str).tolist()).lower()
-                kw_utama = ['jaki', 'jakarta kini', 'pemprov dki', 'dki jakarta', 'beritajakarta']
-                kw_fitur = ['jaklapor', 'jakpantau', 'jakwifi', 'jakwarta', 'jakrespon', 'kelurahan', 'kecamatan', 'rt/rw', 'lapor', 'crm', 'posyandu', 'pbb']
-                
-                skor_utama = sum(teks_gabungan.count(w) for w in kw_utama) * 3
-                skor_fitur = sum(teks_gabungan.count(w) for w in kw_fitur) * 1
-                total_skor_jaki = skor_utama + skor_fitur
-                
-                kw_domain_lain = ['driver', 'gojek', 'gofood', 'shopee', 'tokopedia', 'grab', 'pln', 'ongkir', 'pesanan', 'm-banking', 'seller']
-                skor_domain_lain = sum(teks_gabungan.count(w) for w in kw_domain_lain)
-                
-                sampel_teks = df['Ulasan'].dropna().astype(str).head(100)
-                sampel_vektor = tfidf_vect.transform(sampel_teks)
-                jumlah_fitur_match = (sampel_vektor.sum(axis=0) > 0).sum()
-                
-                if skor_domain_lain > total_skor_jaki and skor_domain_lain > 5:
-                    st.error("❌ Akses Ditolak (Keamanan Konteks): Terdeteksi ulasan dari aplikasi e-commerce/ride-hailing, bukan konteks aplikasi JAKI.")
-                    st.session_state.df_hasil = None
-                elif total_skor_jaki < 3 and jumlah_fitur_match < 5:
-                    st.error("❌ Akses Ditolak (Keamanan Konteks): File yang diunggah tidak mengandung kosa kata/entitas terkait pelayanan aplikasi JAKI.")
-                    st.session_state.df_hasil = None
-                else:
-                    st.success(f"✅ File tervalidasi! Memproses data dari kolom '{kolom_terpilih}' ({df.shape[0]} baris).")
-                    
-                    if st.button("Mulai Pembersihan & Analisis Massal", type="primary"):
-                        with st.status("Memproses Data...", expanded=True) as status:
-                            df_bersih = df.dropna(subset=['Ulasan']).copy()
-                            df_bersih['Ulasan_Bersih'] = df_bersih['Ulasan'].apply(pembersihan_teks)
-                            df_bersih = df_bersih[df_bersih['Ulasan_Bersih'].str.strip() != '']
-                            
-                            vektor_massal = tfidf_vect.transform(df_bersih['Ulasan_Bersih'])
-                            df_bersih['Label_Sentimen'] = svm_model.predict(vektor_massal)
-                            
-                            st.session_state.df_hasil = df_bersih
-                            status.update(label="Pemrosesan Selesai!", state="complete", expanded=False)
-                        
-                        with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
-                            df_display = df_bersih.head(10).copy()
-                            df_display.index = np.arange(1, len(df_display) + 1)
-                            st.dataframe(df_display, use_container_width=True)
-                        
-                        csv_output = df_bersih.to_csv(index=False).encode('utf-8')
-                        st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
-                        st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
-                        
-        except Exception as e:
-            st.error(f"Terjadi kesalahan teknis: {e}")
-            st.session_state.df_hasil = None
-
-# ==========================================
-# TAB 3: DASHBOARD VISUALISASI EKSKLUSIF
-# ==========================================
-with tab3:
-    if st.session_state.df_hasil is None:
-        st.warning("⚠️ Silakan unggah dan proses data di **Tab 2** terlebih dahulu untuk mengaktifkan Dashboard.")
-    else:
-        df_viz = st.session_state.df_hasil
-        total_ulasan = len(df_viz)
-        jml_positif = len(df_viz[df_viz['Label_Sentimen'] == 'Positif'])
-        jml_negatif = len(df_viz[df_viz['Label_Sentimen'] == 'Negatif'])
-        
-        st.markdown(f"""
-        <div class="kpi-container">
-            <div class="kpi-card kpi-total">
-                <p class="kpi-title" style="color:#6c757d;">Total Ulasan Diproses</p>
-                <p class="kpi-value" style="color:#343a40;">{total_ulasan:,}</p>
-            </div>
-            <div class="kpi-card kpi-positif">
-                <p class="kpi-title" style="color:#4E79A7;">Sentimen Positif (Biru)</p>
-                <p class="kpi-value" style="color:#4E79A7;">{jml_positif:,} <span style="font-size:1rem;">({round((jml_positif/total_ulasan)*100, 1)}%)</span></p>
-            </div>
-            <div class="kpi-card kpi-negatif">
-                <p class="kpi-title" style="color:#E15759;">Sentimen Negatif (Merah)</p>
-                <p class="kpi-value" style="color:#E15759;">{jml_negatif:,} <span style="font-size:1rem;">({round((jml_negatif/total_ulasan)*100, 1)}%)</span></p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.write("---")
-        color_map = {'Positif':'#4E79A7', 'Negatif':'#E15759'}
-        
-        col1, col2, col3 = st.columns(3)
-        sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
-        sentimen_counts.columns = ['Sentimen', 'Jumlah']
-        
-        with col1:
-            fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
-                             color='Sentimen', color_discrete_map=color_map, hole=0.4)
-            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-            st.plotly_chart(fig_pie, use_container_width=True)
-            
-        with col2:
-            fig_bar = px.bar(sentimen_counts, x='Sentimen', y='Jumlah', title='Distribusi Jumlah',
-                             text='Jumlah', color='Sentimen', color_discrete_map=color_map)
-            fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-            fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-            st.plotly_chart(fig_bar, use_container_width=True)
-            
-        with col3:
-            if 'Jumlah_Like' in df_viz.columns:
-                df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
-                df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
-                
-                fig_scatter = px.strip(df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
-                                         title="Sebaran Interaksi Ulasan (Berdasarkan Like)",
-                                         custom_data=['Ulasan_Wrap'], color_discrete_map=color_map)
-                
-                fig_scatter.update_traces(
-                    marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
-                    hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
-                )
-                fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-                st.plotly_chart(fig_scatter, use_container_width=True)
-            else:
-                st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
-        
-        st.write("---")
-        
-        header_style = '<p style="font-size:16px; font-weight:bold; color:#31333F; margin-bottom:10px;">{}</p>'
-        
-        # DEFINISIKAN TINGGI YANG SAMA UNTUK KETIGA GRAFIK DI BARIS BAWAH
-        TINGGI_GRAFIK = 420 
-
-        col4, col5, col6 = st.columns(3)
-        
-        with col4:
-            st.markdown(header_style.format("Kecepatan Ulasan Peta Panas"), unsafe_allow_html=True)
-            if 'Tanggal_dan_Jam' in df_viz.columns:
-                df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
-                hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
-                df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
-                df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
-                
-                heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
-                pivot_data = heatmap_data.pivot(index='Hari', columns='Jam', values='Jumlah').fillna(0)
-                kategori_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
-                pivot_data = pivot_data.reindex(kategori_hari[::-1])
-                
-                for jam in range(24):
-                    if jam not in pivot_data.columns:
-                        pivot_data[jam] = 0
-                pivot_data = pivot_data[sorted(pivot_data.columns)]
-                
-                fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
-                                   x=pivot_data.columns, y=pivot_data.index, 
-                                   color_continuous_scale="Blues", aspect="auto")
-                
-                fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
-                # Set Tinggi Tetap (420px)
-                fig_hm.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), coloraxis_showscale=False)
-                st.plotly_chart(fig_hm, use_container_width=True)
-            else:
-                st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
-
-        # FUNGSI BARU: Hasilkan array gambar WordCloud (Resolusi tinggi, bentuk kotak)
-        def buat_wordcloud_array(teks_gabungan, colormap):
-            if len(teks_gabungan) > 0:
-                wc = WordCloud(width=800, height=800, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
-                return wc.to_array() 
-            return None
-
-        with col5:
-            st.markdown(header_style.format("Kata Kunci Positif"), unsafe_allow_html=True)
-            teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
-            img_pos = buat_wordcloud_array(teks_pos, "Blues")
-            if img_pos is not None: 
-                # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
-                fig_wc_pos = px.imshow(img_pos)
-                fig_wc_pos.update_xaxes(visible=False) # Sembunyikan sumbu X
-                fig_wc_pos.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                fig_wc_pos.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
-                st.plotly_chart(fig_wc_pos, use_container_width=True)
-
-        with col6:
-            st.markdown(header_style.format("Kata Kunci Negatif"), unsafe_allow_html=True)
-            teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
-            img_neg = buat_wordcloud_array(teks_neg, "Reds")
-            if img_neg is not None: 
-                # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
-                fig_wc_neg = px.imshow(img_neg)
-                fig_wc_neg.update_xaxes(visible=False) # Sembunyikan sumbu X
-                fig_wc_neg.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                fig_wc_neg.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
-                st.plotly_chart(fig_wc_neg, use_container_width=True)
+tab1, tab2, tab3 = st.tabs(["Uji Teks", "Pemrosesan CSV", "Visualisasi Data"])
