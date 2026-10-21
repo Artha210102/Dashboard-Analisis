@@ -58,7 +58,6 @@ def load_text_processor():
     list_stopwords.extend(kata_tambahan)
     
     return stemmer, list_stopwords
-
 stemmer, list_stopwords = load_text_processor()
 
 # Kamus Normalisasi
@@ -101,7 +100,6 @@ def load_models():
     model = joblib.load('model_svm_jaki.pkl')
     vectorizer = joblib.load('tfidf_jaki.pkl')
     return model, vectorizer
-
 try:
     svm_model, tfidf_vect = load_models()
 except Exception as e:
@@ -294,9 +292,14 @@ with tab3:
                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
         
         st.write("---")
+        
+        # --- PERBAIKAN RESPONSIVITAS: MEMISAHKAN JUDUL DARI DALAM GRAFIK ---
+        header_style = '<p style="font-size:16px; font-weight:bold; color:#31333F; margin-bottom:10px;">{}</p>'
+        
         col4, col5, col6 = st.columns(3)
         
         with col4:
+            st.markdown(header_style.format("Kecepatan Ulasan Peta Panas"), unsafe_allow_html=True)
             if 'Tanggal_dan_Jam' in df_viz.columns:
                 df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
                 hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
@@ -313,40 +316,37 @@ with tab3:
                         pivot_data[jam] = 0
                 pivot_data = pivot_data[sorted(pivot_data.columns)]
                 
+                # Title dihapus dari dalam Plotly
                 fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
                                    x=pivot_data.columns, y=pivot_data.index, 
-                                   color_continuous_scale="Blues", aspect="auto",
-                                   title="Kecepatan Ulasan Peta Panas")
+                                   color_continuous_scale="Blues", aspect="auto")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
                 
-                # MENGUNCI TINGGI HEATMAP AGAR SEJAJAR DENGAN WORD CLOUD
-                fig_hm.update_layout(height=380, margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
+                # Height dihapus agar bebas menyesuaikan diri. Margin Top dikurangi.
+                fig_hm.update_layout(margin=dict(t=0, b=20, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
 
-        def buat_wordcloud(teks_gabungan, title, colormap):
+        # FUNGSI BARU: Langsung ubah ke Image tanpa dibungkus Matplotlib Figure
+        def buat_wordcloud_image(teks_gabungan, colormap):
             if len(teks_gabungan) > 0:
-                wc = WordCloud(width=500, height=350, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
-                fig, ax = plt.subplots(figsize=(5, 3.5))
-                ax.imshow(wc, interpolation='bilinear')
-                ax.axis("off")
-                ax.set_title(title, fontfamily='sans-serif', fontweight='normal', fontsize=14, pad=10, loc='left')
-                
-                # MENGHAPUS MARGIN MATPLOTLIB AGAR TIDAK TERDORONG KE BAWAH SAAT ZOOM 100%
-                fig.tight_layout(pad=0) 
-                return fig
+                wc = WordCloud(width=800, height=600, background_color='white', colormap=colormap, max_words=80, margin=0).generate(teks_gabungan)
+                return wc.to_array() # Kembalikan sebagai Array Gambar murni
             return None
 
         with col5:
+            st.markdown(header_style.format("Kata Kunci Positif"), unsafe_allow_html=True)
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
-            fig_wc_pos = buat_wordcloud(teks_pos, "Kata Kunci Positif", "Blues")
-            if fig_wc_pos: 
-                st.pyplot(fig_wc_pos, use_container_width=True)
+            img_pos = buat_wordcloud_image(teks_pos, "Blues")
+            if img_pos is not None: 
+                # Menggunakan st.image membuatnya 100% responsif terhadap CSS Browser
+                st.image(img_pos, use_container_width=True)
 
         with col6:
+            st.markdown(header_style.format("Kata Kunci Negatif"), unsafe_allow_html=True)
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
-            fig_wc_neg = buat_wordcloud(teks_neg, "Kata Kunci Negatif", "Reds")
-            if fig_wc_neg: 
-                st.pyplot(fig_wc_neg, use_container_width=True)
+            img_neg = buat_wordcloud_image(teks_neg, "Reds")
+            if img_neg is not None: 
+                st.image(img_neg, use_container_width=True)
