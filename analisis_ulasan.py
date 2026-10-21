@@ -119,7 +119,10 @@ st.markdown("""
         border-top: none;
         border-radius: 0 0 12px 12px;
         padding: 10px 20px !important;
-        margin-top: -1rem !important;
+        
+        /* 👇 INI YANG DIPERBAIKI: Mengubah -1rem menjadi 0rem agar tidak menabrak ke atas 👇 */
+        margin-top: 0rem !important; 
+        
         margin-bottom: 24px !important;
         align-items: center !important;
         box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.06);
