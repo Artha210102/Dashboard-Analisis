@@ -8,7 +8,6 @@ import textwrap
 from nltk.corpus import stopwords
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import plotly.express as px
-import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 # --- PENGATURAN HALAMAN ---
@@ -293,9 +292,21 @@ with tab3:
         
         st.write("---")
         
-        # --- PERBAIKAN RESPONSIVITAS: MEMISAHKAN JUDUL DARI DALAM GRAFIK ---
         header_style = '<p style="font-size:16px; font-weight:bold; color:#31333F; margin-bottom:10px;">{}</p>'
         
+        # Tambahan CSS untuk memastikan image container Streamlit juga memanjang
+        st.markdown(
+            """
+            <style>
+            [data-testid="stImage"] img {
+                object-fit: cover;
+                height: 100%;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
         col4, col5, col6 = st.columns(3)
         
         with col4:
@@ -316,24 +327,22 @@ with tab3:
                         pivot_data[jam] = 0
                 pivot_data = pivot_data[sorted(pivot_data.columns)]
                 
-                # Title dihapus dari dalam Plotly
                 fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
                                    x=pivot_data.columns, y=pivot_data.index, 
                                    color_continuous_scale="Blues", aspect="auto")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
                 
-                # Height dihapus agar bebas menyesuaikan diri. Margin Top dikurangi.
                 fig_hm.update_layout(margin=dict(t=0, b=20, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
 
-        # FUNGSI BARU: Langsung ubah ke Image tanpa dibungkus Matplotlib Figure
+        # UBAH UKURAN: Lebar dikurangi, Tinggi ditambah agar rasio gambar memanjang ke bawah
         def buat_wordcloud_image(teks_gabungan, colormap):
             if len(teks_gabungan) > 0:
-                wc = WordCloud(width=800, height=600, background_color='white', colormap=colormap, max_words=80, margin=0).generate(teks_gabungan)
-                return wc.to_array() # Kembalikan sebagai Array Gambar murni
+                wc = WordCloud(width=500, height=700, background_color='white', colormap=colormap, max_words=80, margin=0).generate(teks_gabungan)
+                return wc.to_array() 
             return None
 
         with col5:
@@ -341,7 +350,6 @@ with tab3:
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
             img_pos = buat_wordcloud_image(teks_pos, "Blues")
             if img_pos is not None: 
-                # Menggunakan st.image membuatnya 100% responsif terhadap CSS Browser
                 st.image(img_pos, use_container_width=True)
 
         with col6:
