@@ -10,7 +10,6 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import plotly.express as px
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from sklearn.metrics import confusion_matrix, classification_report
 
 # --- PENGATURAN HALAMAN ---
 st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
@@ -59,6 +58,7 @@ def load_text_processor():
     list_stopwords.extend(kata_tambahan)
     
     return stemmer, list_stopwords
+
 stemmer, list_stopwords = load_text_processor()
 
 # Kamus Normalisasi
@@ -101,6 +101,7 @@ def load_models():
     model = joblib.load('model_svm_jaki.pkl')
     vectorizer = joblib.load('tfidf_jaki.pkl')
     return model, vectorizer
+
 try:
     svm_model, tfidf_vect = load_models()
 except Exception as e:
@@ -115,7 +116,7 @@ if 'df_hasil' not in st.session_state:
     st.session_state.df_hasil = None
 
 # --- TAB NAVIGASI ---
-tab1, tab2, tab3, tab4 = st.tabs(["💬 Analisis Teks Tunggal", "📁 Pemrosesan Massal", "📊 Dashboard Visualisasi", "📈 Evaluasi Model"])
+tab1, tab2, tab3 = st.tabs(["💬 Analisis Teks Tunggal", "📁 Pemrosesan Massal", "📊 Dashboard Visualisasi"])
 
 # ==========================================
 # TAB 1: ANALISIS TEKS TUNGGAL
@@ -218,7 +219,7 @@ with tab2:
                         
                         csv_output = df_bersih.to_csv(index=False).encode('utf-8')
                         st.download_button("📥 Unduh Hasil Analisis (CSV)", data=csv_output, file_name='Hasil_JAKI.csv', mime='text/csv')
-                        st.success("🎉 Berhasil! Buka **Tab 3** untuk Visualisasi atau **Tab 4** untuk Evaluasi Model.")
+                        st.success("🎉 Berhasil! Buka **Tab 3** untuk melihat Dashboard Visualisasi Anda.")
                         
         except Exception as e:
             st.error(f"Terjadi kesalahan teknis: {e}")
@@ -318,7 +319,9 @@ with tab3:
                                    title="Kecepatan Ulasan Peta Panas")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
-                fig_hm.update_layout(margin=dict(t=30, b=20, l=10, r=10), coloraxis_showscale=False)
+                
+                # MENGUNCI TINGGI HEATMAP AGAR SEJAJAR DENGAN WORD CLOUD
+                fig_hm.update_layout(height=380, margin=dict(t=40, b=20, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
@@ -330,7 +333,9 @@ with tab3:
                 ax.imshow(wc, interpolation='bilinear')
                 ax.axis("off")
                 ax.set_title(title, fontfamily='sans-serif', fontweight='normal', fontsize=14, pad=10, loc='left')
-                fig.tight_layout(pad=1)
+                
+                # MENGHAPUS MARGIN MATPLOTLIB AGAR TIDAK TERDORONG KE BAWAH SAAT ZOOM 100%
+                fig.tight_layout(pad=0) 
                 return fig
             return None
 
@@ -345,70 +350,3 @@ with tab3:
             fig_wc_neg = buat_wordcloud(teks_neg, "Kata Kunci Negatif", "Reds")
             if fig_wc_neg: 
                 st.pyplot(fig_wc_neg, use_container_width=True)
-
-
-# ==========================================
-# TAB 4: EVALUASI MODEL (CONFUSION MATRIX)
-# ==========================================
-with tab4:
-    if st.session_state.df_hasil is None:
-        st.warning("⚠️ Silakan unggah dan proses data di **Tab 2** terlebih dahulu.")
-    else:
-        st.subheader("Evaluasi Performa Model")
-        
-        df_eval = st.session_state.df_hasil.copy()
-        
-        # LOGIKA CERDAS: Mencari apakah ada kolom untuk Ground Truth (Rating/Bintang)
-        kolom_ground_truth_potensial = None
-        for col in df_eval.columns:
-            if str(col).strip().lower() in ['rating', 'bintang', 'score', 'star']:
-                kolom_ground_truth_potensial = col
-                break
-        
-        if kolom_ground_truth_potensial is None:
-            # Skenario 2: Tidak ada kolom Rating. Beri tahu user bahwa evaluasi tidak bisa dilakukan.
-            st.info("💡 **Informasi Sistem:** Data *scraping* yang Anda unggah hanya berisi teks ulasan tanpa adanya nilai kebenaran aktual (*Ground Truth*) seperti Rating atau Label Manual manusia.")
-            st.warning("⚠️ **Evaluasi Tidak Dapat Dilakukan:** Untuk menghitung Akurasi dan *Confusion Matrix*, sistem memerlukan acuan kebenaran (contoh: Rating pengguna) untuk dibandingkan dengan hasil Prediksi Model. Karena data acuan tersebut tidak ada, maka penghitungan tidak dapat diproses.")
-            st.markdown("*(Mengevaluasi Prediksi menggunakan kolom Prediksi itu sendiri akan menghasilkan akurasi palsu 100%, sehingga sistem mencegah tindakan tersebut demi menjaga validitas data).*")
-        else:
-            # Skenario 1: Ada kolom Rating. Lakukan evaluasi secara otomatis.
-            st.success(f"✅ Sistem mendeteksi kolom **'{kolom_ground_truth_potensial}'** sebagai acuan nilai kebenaran aktual (*Ground Truth*).")
-            st.caption("*Asumsi konversi: Bintang 4 & 5 dianggap sebagai sentimen **Positif**, sedangkan Bintang 1, 2, & 3 dianggap sebagai sentimen **Negatif**.*")
-            
-            y_pred = df_eval['Label_Sentimen']
-            
-            # Konversi nilai Rating menjadi 'Positif' / 'Negatif'
-            df_eval['y_true_temp'] = pd.to_numeric(df_eval[kolom_ground_truth_potensial], errors='coerce').apply(
-                lambda x: 'Positif' if x >= 4 else 'Negatif'
-            )
-            
-            y_true = df_eval['y_true_temp']
-            labels_urut = ['Positif', 'Negatif']
-
-            col_eval1, col_eval2 = st.columns(2)
-            
-            with col_eval1:
-                st.markdown("#### Confusion Matrix Heatmap")
-                cm = confusion_matrix(y_true, y_pred, labels=labels_urut)
-                
-                fig_cm = px.imshow(cm, 
-                                   labels=dict(x="Tebakan Model Mesin (Prediksi)", y=f"Kenyataan Asli (Dari {kolom_ground_truth_potensial})", color="Jumlah"),
-                                   x=labels_urut, 
-                                   y=labels_urut,
-                                   text_auto=True,
-                                   color_continuous_scale='Blues')
-                fig_cm.update_xaxes(side="bottom")
-                fig_cm.update_layout(margin=dict(t=30, l=10, r=10, b=10))
-                st.plotly_chart(fig_cm, use_container_width=True)
-                
-            with col_eval2:
-                st.markdown("#### Classification Report")
-                report = classification_report(y_true, y_pred, output_dict=True, labels=labels_urut, zero_division=0)
-                
-                akurasi = report.pop('accuracy')
-                df_report = pd.DataFrame(report).transpose()
-                df_report[['precision', 'recall', 'f1-score']] = df_report[['precision', 'recall', 'f1-score']].round(3)
-                df_report['support'] = df_report['support'].astype(int)
-                
-                st.dataframe(df_report, use_container_width=True)
-                st.success(f"🎯 **Tingkat Akurasi Model: {akurasi * 100:.2f}%**")
