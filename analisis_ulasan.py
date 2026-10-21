@@ -777,7 +777,7 @@ def render_hero_section():
             <div class="mv-hero-box">
                 <div class="mv-domain-pill">● Natural Language Processing &bull; Text Classification</div>
                 <div class="mv-main-title">
-                    Analisis Sentimen Ulasan<span class="serif-italic">(Aplikasi JAKI)</span>
+                    Analisis Sentimen Ulasan<span class="serif-italic">Aplikasi Jakarta Kini (JAKI)</span>
                 </div>
                 <div class="mv-hero-lead">
                     Sistem klasifikasi dua kategori ulasan sentimen opini masyarakat pada aplikasi <strong>Jakarta Kini (JAKI)</strong>
