@@ -146,7 +146,7 @@ def load_text_processor():
 
 stemmer, list_stopwords = load_text_processor()
 
-# PERBAIKAN DI SINI: Kamus normalisasi ditutup dengan benar
+# PERBAIKAN: Kamus normalisasi ditutup dengan benar tanpa teks menyasar
 kamus_normalisasi = {
     'ga': 'tidak', 'gak': 'tidak', 'enggak': 'tidak', 'ngga': 'tidak', 'nggak': 'tidak', 'gk': 'tidak', 'g': 'tidak', 'tdk': 'tidak', 'ndak': 'tidak', 'jgn': 'jangan', 'blm': 'belum', 'bkn': 'bukan', 'lemot': 'lambat', 'lmot': 'lambat','lelet': 'lambat', 'ngelag': 'lambat', 'ngeleg': 'lambat', 'lag': 'lambat', 'error': 'rusak', 'eror': 'rusak','cacat': 'rusak', 'bug': 'rusak','blank': 'rusak', 'bagus': 'bagus', 'goks': 'bagus', 'gokil': 'bagus', 'keren': 'bagus', 'oon': 'bodoh', 'gblk': 'bodoh', 'bego': 'bodoh', 'tolol': 'bodoh', 'jelek': 'buruk', 'cemen': 'buruk'
 }
@@ -175,7 +175,6 @@ def pembersihan_teks(text):
 # --- FUNGSI LOAD MODEL ---
 @st.cache_resource
 def load_models():
-    # Pastikan model_svm_jaki.pkl dan tfidf_jaki.pkl ada di folder yang sama
     model = joblib.load('model_svm_jaki.pkl')
     vectorizer = joblib.load('tfidf_jaki.pkl')
     return model, vectorizer
@@ -256,7 +255,7 @@ with tab2:
         elif 'text' in df.columns:
             kolom_target = 'text'
         else:
-            kolom_target = df.columns[0]
+            kolom_target = df.columns[0] # Gunakan kolom pertama sebagai default
             st.warning(f"Kolom 'Ulasan' tidak ditemukan. Menggunakan kolom pertama: '{kolom_target}'")
 
         if st.button("Proses Seluruh Data"):
