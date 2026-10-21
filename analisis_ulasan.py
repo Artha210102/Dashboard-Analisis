@@ -1151,7 +1151,7 @@ def render_pemrosesan_massal():
     if st.session_state.df_hasil is not None:
         df_out = st.session_state.df_hasil
         with st.expander("📄 Klik untuk melihat sampel data yang telah diproses", expanded=True):
-                            df_display = df_bersih.head(10).copy()
+                            st.dataframe(df_out.head(10), use_container_width=True)
                             df_display.index = np.arange(1, len(df_display) + 1)
                             st.dataframe(df_display, use_container_width=True)
 
