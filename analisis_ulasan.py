@@ -294,18 +294,8 @@ with tab3:
         
         header_style = '<p style="font-size:16px; font-weight:bold; color:#31333F; margin-bottom:10px;">{}</p>'
         
-        # Tambahan CSS untuk memastikan image container Streamlit juga memanjang
-        st.markdown(
-            """
-            <style>
-            [data-testid="stImage"] img {
-                object-fit: cover;
-                height: 100%;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+        # DEFINISIKAN TINGGI YANG SAMA UNTUK KETIGA GRAFIK DI BARIS BAWAH
+        TINGGI_GRAFIK = 420 
 
         col4, col5, col6 = st.columns(3)
         
@@ -332,29 +322,39 @@ with tab3:
                                    color_continuous_scale="Blues", aspect="auto")
                 
                 fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
-                
-                fig_hm.update_layout(margin=dict(t=0, b=20, l=10, r=10), coloraxis_showscale=False)
+                # Set Tinggi Tetap (420px)
+                fig_hm.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), coloraxis_showscale=False)
                 st.plotly_chart(fig_hm, use_container_width=True)
             else:
                 st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
 
-        # UBAH UKURAN: Lebar dikurangi, Tinggi ditambah agar rasio gambar memanjang ke bawah
-        def buat_wordcloud_image(teks_gabungan, colormap):
+        # FUNGSI BARU: Hasilkan array gambar WordCloud (Resolusi tinggi, bentuk kotak)
+        def buat_wordcloud_array(teks_gabungan, colormap):
             if len(teks_gabungan) > 0:
-                wc = WordCloud(width=500, height=700, background_color='white', colormap=colormap, max_words=80, margin=0).generate(teks_gabungan)
+                wc = WordCloud(width=800, height=800, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
                 return wc.to_array() 
             return None
 
         with col5:
             st.markdown(header_style.format("Kata Kunci Positif"), unsafe_allow_html=True)
             teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
-            img_pos = buat_wordcloud_image(teks_pos, "Blues")
+            img_pos = buat_wordcloud_array(teks_pos, "Blues")
             if img_pos is not None: 
-                st.image(img_pos, use_container_width=True)
+                # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
+                fig_wc_pos = px.imshow(img_pos)
+                fig_wc_pos.update_xaxes(visible=False) # Sembunyikan sumbu X
+                fig_wc_pos.update_yaxes(visible=False) # Sembunyikan sumbu Y
+                fig_wc_pos.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
+                st.plotly_chart(fig_wc_pos, use_container_width=True)
 
         with col6:
             st.markdown(header_style.format("Kata Kunci Negatif"), unsafe_allow_html=True)
             teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
-            img_neg = buat_wordcloud_image(teks_neg, "Reds")
+            img_neg = buat_wordcloud_array(teks_neg, "Reds")
             if img_neg is not None: 
-                st.image(img_neg, use_container_width=True)
+                # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
+                fig_wc_neg = px.imshow(img_neg)
+                fig_wc_neg.update_xaxes(visible=False) # Sembunyikan sumbu X
+                fig_wc_neg.update_yaxes(visible=False) # Sembunyikan sumbu Y
+                fig_wc_neg.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
+                st.plotly_chart(fig_wc_neg, use_container_width=True)
