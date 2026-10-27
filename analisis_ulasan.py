@@ -85,9 +85,63 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        flex: 1 1 520px;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
+    }
+    .mv-topbar-left > span:last-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    .mv-badge-research {
+        flex: 0 0 auto;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.35;
+    }
+    .jaki-chart-title {
+        color: #273449;
+        font-size: 1rem;
+        font-weight: 750;
+        line-height: 1.35;
+        letter-spacing: -0.015em;
+        margin: 0 0 0.45rem 0;
+        overflow-wrap: anywhere;
+    }
+    .jaki-chart-card-note {
+        color: #64748B;
+        font-size: .75rem;
+        line-height: 1.45;
+        margin: -2px 0 8px 0;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: #FFFFFF !important;
+        border: 1px solid #DCE4EF !important;
+        border-radius: 12px !important;
+        padding: 14px !important;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, .045) !important;
+        min-width: 0 !important;
+    }
+    div[data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    div[data-testid="stPlotlyChart"] iframe {
+        max-width: 100% !important;
+    }
+    /* Baris dashboard: 3 kolom desktop, 2 tablet, 1 ponsel */
+    div[data-testid="stHorizontalBlock"]:has(.jaki-chart-title) {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(.jaki-chart-title) > div[data-testid="column"] {
+        flex: 1 1 calc(33.333% - 1rem) !important;
+        width: auto !important;
+        min-width: 0 !important;
     }
     .mv-badge-research {
         display: inline-flex;
@@ -630,10 +684,15 @@ st.markdown("""
     div[data-testid="stDataFrame"], div[data-testid="stTable"] { width: 100%; }
 
     /* Tablet */
+    @media (min-width: 761px) and (max-width: 1100px) {
+        div[data-testid="stHorizontalBlock"]:has(.jaki-chart-title) > div[data-testid="column"] {
+            flex-basis: calc(50% - 1rem) !important;
+        }
+    }
     @media (max-width: 1100px) {
         .mv-topbar { gap: 8px 16px; padding: 10px 16px; }
-        .mv-topbar-left { white-space: normal; min-width: 0; }
-        .mv-topbar-right { flex-wrap: wrap; }
+        .mv-topbar-left { white-space: normal; min-width: 0; flex-basis: 100%; align-items: flex-start; }
+        .mv-topbar-right { flex-wrap: wrap; width: 100%; }
         .mv-main-title { font-size: clamp(1.7rem, 3vw, 2.1rem); }
         .mv-metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .mv-sec-header { align-items: flex-start; }
@@ -642,16 +701,24 @@ st.markdown("""
 
     /* Ponsel: cegah navbar, kartu metrik, dan tombol sampel menjadi sempit */
     @media (max-width: 760px) {
+        div[data-testid="stHorizontalBlock"]:has(.jaki-chart-title) > div[data-testid="column"] {
+            flex-basis: 100% !important;
+        }
         .block-container {
             padding-top: .5rem !important;
             padding-bottom: 2rem !important;
         }
         .mv-topbar { border-radius: 10px 10px 0 0; padding: 12px 14px; }
         .mv-topbar-left, .mv-topbar-right {
-            width: 100%; white-space: normal; overflow: visible;
-            font-size: .72rem; line-height: 1.55;
+            width: 100%; min-width: 0; white-space: normal; overflow: visible;
+            font-size: .72rem; line-height: 1.55; flex-basis: 100%;
         }
+        .mv-topbar-left { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .mv-badge-research { max-width: 100%; }
         .mv-topbar-right { gap: 6px 9px; }
+        div[data-testid="stVerticalBlockBorderWrapper"] { padding: 10px !important; border-radius: 10px !important; }
+        .jaki-chart-title { font-size: .95rem; }
+        div[data-testid="stPlotlyChart"] { overflow: hidden; }
         div[data-testid="stHorizontalBlock"]:has(#mv-nav-brand) {
             padding: 12px !important;
             border-radius: 0 0 12px 12px;
@@ -1547,52 +1614,52 @@ def render_dashboard_visualisasi():
 
             with col1:
                 with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
                     fig_pie = px.pie(
                         sentimen_counts, values='Jumlah', names='Sentimen',
-                        title='Sentimen Keseluruhan',
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    fig_pie.update_layout(height=350, autosize=True, margin=dict(t=8, b=8, l=4, r=4), showlegend=True)
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
             with col2:
                 with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Distribusi Jumlah</div>', unsafe_allow_html=True)
                     fig_bar = px.bar(
                         sentimen_counts, x='Sentimen', y='Jumlah',
-                        title='Distribusi Jumlah',
                         text='Jumlah', color='Sentimen', color_discrete_map=color_map
                     )
                     fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-                    fig_bar.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-                    st.plotly_chart(fig_bar, use_container_width=True)
+                    fig_bar.update_layout(height=350, autosize=True, margin=dict(t=18, b=28, l=8, r=8), showlegend=True)
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
     
             with col3:
                 with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Sebaran Interaksi Ulasan (Berdasarkan Like)</div>', unsafe_allow_html=True)
                     if 'Jumlah_Like' in df_viz.columns:
                         df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
                         df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
     
                         fig_scatter = px.strip(
                             df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
-                            title="Sebaran Interaksi Ulasan (Berdasarkan Like)",
                             custom_data=['Ulasan_Wrap'], color_discrete_map=color_map
                         )
                         fig_scatter.update_traces(
                             marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                             hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                         )
-                        fig_scatter.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
-                        st.plotly_chart(fig_scatter, use_container_width=True)
+                        fig_scatter.update_layout(height=350, autosize=True, margin=dict(t=12, b=28, l=8, r=8), showlegend=True)
+                        st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
     
             st.write("---")
             
-            header_style = '<p style="font-size:16px; font-weight:bold; color:#31333F; margin-bottom:10px;">{}</p>'
+            header_style = '<div class="jaki-chart-title">{}</div>'
 
-            # DEFINISIKAN TINGGI YANG SAMA UNTUK KETIGA GRAFIK DI BARIS BAWAH
-            TINGGI_GRAFIK = 420 
+            # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
+            TINGGI_GRAFIK = 390 
     
             col4, col5, col6 = st.columns(3)
             
@@ -1621,8 +1688,8 @@ def render_dashboard_visualisasi():
                         
                         fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
                         # Set Tinggi Tetap (420px)
-                        fig_hm.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), coloraxis_showscale=False)
-                        st.plotly_chart(fig_hm, use_container_width=True)
+                        fig_hm.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=8, b=24, l=4, r=4), coloraxis_showscale=False)
+                        st.plotly_chart(fig_hm, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
         
@@ -1643,8 +1710,8 @@ def render_dashboard_visualisasi():
                         fig_wc_pos = px.imshow(img_pos)
                         fig_wc_pos.update_xaxes(visible=False) # Sembunyikan sumbu X
                         fig_wc_pos.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                        fig_wc_pos.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
-                        st.plotly_chart(fig_wc_pos, use_container_width=True)
+                        fig_wc_pos.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=4, b=4, l=4, r=4), hovermode=False)
+                        st.plotly_chart(fig_wc_pos, use_container_width=True, config={'responsive': True})
         
             with col6:
                 with st.container(border=True):
@@ -1656,8 +1723,8 @@ def render_dashboard_visualisasi():
                         fig_wc_neg = px.imshow(img_neg)
                         fig_wc_neg.update_xaxes(visible=False) # Sembunyikan sumbu X
                         fig_wc_neg.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                        fig_wc_neg.update_layout(height=TINGGI_GRAFIK, margin=dict(t=10, b=30, l=10, r=10), hovermode=False)
-                        st.plotly_chart(fig_wc_neg, use_container_width=True)
+                        fig_wc_neg.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=4, b=4, l=4, r=4), hovermode=False)
+                        st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
     
     
     # =====================================================================
