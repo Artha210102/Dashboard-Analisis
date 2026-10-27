@@ -13,79 +13,238 @@ from wordcloud import WordCloud
 # --- PENGATURAN HALAMAN ---
 st.set_page_config(page_title="Sentimen JAKI | Pemprov DKI", page_icon="🏛️", layout="wide")
 
-# --- CUSTOM CSS LANJUTAN (PERBAIKAN UI MODERN) ---
+# --- CIVIC INTELLIGENCE UI: CUSTOM CSS ---
 st.markdown("""
-    <style>
-    /* Latar Belakang Dotted (Titik-titik) */
-    .stApp {
-        background-color: #f8f9fa;
-        background-image: radial-gradient(#d1d5db 1px, transparent 1px);
-        background-size: 24px 24px;
-    }
-    
-    /* Styling Top Banner Gelap */
-    .top-banner {
-        background-color: #0F172A;
-        color: white;
-        padding: 20px 25px;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .main-header {font-size: 2.2rem; color: #FFFFFF; font-weight: 800; margin: 0; padding-bottom: 5px;}
-    .sub-header {color: #94A3B8; margin: 0; font-size: 1.1rem;}
-    
-    /* Modifikasi Tampilan Tab Bawaan Streamlit Menjadi Button */
-    div[data-baseweb="tab-list"] {
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    div[data-baseweb="tab"] {
-        background-color: white;
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        padding: 10px 20px;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        color: #4B5563;
-        font-weight: 600;
-    }
-    div[data-baseweb="tab"][aria-selected="true"] {
-        background-color: #0F172A;
-        color: white !important;
-        border-color: #0F172A;
-    }
-    div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
-        display: none;
-    }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
-    /* Container Putih untuk Konten Tab */
-    .content-box {
-        background-color: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        border: 1px solid #F3F4F6;
-        margin-bottom: 20px;
-    }
+:root {
+    --navy: #142B3B;
+    --navy-deep: #0D202D;
+    --teal: #0F8B8D;
+    --teal-light: #E8F6F4;
+    --ink: #243746;
+    --muted: #71808D;
+    --line: #E2E9EC;
+    --surface: #FFFFFF;
+    --canvas: #F4F7F8;
+}
 
-    /* Alert Boxes Modern */
-    .success-box {padding: 15px; border-radius: 8px; background-color: #F0FDF4; border: 1px solid #BBF7D0; border-left: 6px solid #059669; color: #166534; margin-top: 15px;}
-    .error-box {padding: 15px; border-radius: 8px; background-color: #FEF2F2; border: 1px solid #FECACA; border-left: 6px solid #DC2626; color: #991B1B; margin-top: 15px;}
-    
-    /* Styling Custom KPI Cards Modern */
-    .kpi-container {display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px;}
-    .kpi-card {flex: 1; padding: 25px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; border: 1px solid #E5E7EB; background-color: white;}
-    
-    .kpi-total {border-top: 5px solid #6B7280;}
-    .kpi-positif {border-top: 5px solid #4E79A7;}
-    .kpi-negatif {border-top: 5px solid #E15759;}
-    
-    .kpi-title {font-size: 1rem; font-weight: 600; margin: 0; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
-    .kpi-value {font-size: 2.8rem; font-weight: 800; margin: 0;}
-    </style>
+.stApp {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+}
+[data-testid="stHeader"] { background: rgba(244,247,248,0.92); }
+.block-container {
+    max-width: 1440px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+h1, h2, h3, h4, p, label, [data-testid="stMarkdownContainer"] {
+    font-family: 'DM Sans', sans-serif;
+}
+h1, h2, h3 { color: var(--navy); letter-spacing: -0.025em; }
+h2 { font-weight: 750; }
+h3 { font-weight: 700; }
+
+/* Editorial header */
+.top-banner {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(115deg, #102838 0%, #173F50 70%, #126E72 100%);
+    color: #FFFFFF;
+    padding: 34px 38px 32px;
+    border-radius: 18px;
+    margin: 0 0 28px 0;
+    box-shadow: 0 12px 30px rgba(17, 45, 60, 0.10);
+    border: 1px solid rgba(255,255,255,0.10);
+}
+.top-banner:after {
+    content: "";
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    right: -65px;
+    top: -115px;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 50%;
+    box-shadow: 0 0 0 28px rgba(255,255,255,0.035),
+                0 0 0 58px rgba(255,255,255,0.025);
+    pointer-events: none;
+}
+.eyebrow {
+    display: inline-block;
+    color: #A9E4DD;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.main-header {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(1.7rem, 3vw, 2.45rem);
+    line-height: 1.2;
+    color: #FFFFFF;
+    font-weight: 800;
+    margin: 0 0 9px 0;
+    padding: 0;
+}
+.sub-header { color: #D0E0E6; margin: 0; font-size: 1rem; }
+
+/* Tabs: clean navigation with teal active indicator */
+div[data-baseweb="tab-list"] {
+    gap: 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+}
+div[data-baseweb="tab"] {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px 10px 0 0;
+    padding: 12px 18px;
+    color: #637582;
+    font-weight: 650;
+    transition: color .18s ease, background .18s ease;
+}
+div[data-baseweb="tab"]:hover {
+    color: var(--teal);
+    background: #EAF3F4;
+}
+div[data-baseweb="tab"][aria-selected="true"] {
+    background: #FFFFFF;
+    color: var(--navy) !important;
+    border-color: var(--line);
+    border-bottom: 3px solid var(--teal);
+}
+div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display: none; }
+
+/* Main content panels */
+.content-box {
+    background: var(--surface);
+    padding: 28px 30px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    box-shadow: 0 5px 18px rgba(24, 52, 66, 0.035);
+    margin-bottom: 20px;
+}
+[data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
+    border-radius: 14px;
+}
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stTextInput"] input,
+div[data-testid="stFileUploader"] section {
+    border-radius: 10px;
+}
+div[data-testid="stTextArea"] textarea:focus,
+div[data-testid="stTextInput"] input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 1px var(--teal);
+}
+.stButton > button, .stDownloadButton > button {
+    border-radius: 9px;
+    font-weight: 700;
+    min-height: 2.7rem;
+    padding: 0.55rem 1.15rem;
+    transition: all .18s ease;
+}
+.stButton > button[kind="primary"] {
+    background: var(--teal);
+    border: 1px solid var(--teal);
+    color: #FFFFFF;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #0B7375;
+    border-color: #0B7375;
+    box-shadow: 0 5px 12px rgba(15,139,141,.18);
+}
+.stDownloadButton > button {
+    border: 1px solid #B8D8D6;
+    color: #116B6D;
+    background: #F1FAF9;
+}
+div[data-testid="stAlert"] { border-radius: 10px; }
+
+/* Result states */
+.success-box {
+    padding: 17px 19px;
+    border-radius: 11px;
+    background: #ECF8F4;
+    border: 1px solid #BCE6D8;
+    border-left: 5px solid #159A75;
+    color: #12684F;
+    margin-top: 16px;
+}
+.success-box h3 { color: #12684F; margin: 0; font-size: 1.1rem; }
+.error-box {
+    padding: 17px 19px;
+    border-radius: 11px;
+    background: #FFF2F0;
+    border: 1px solid #F3D0CA;
+    border-left: 5px solid #D95D4F;
+    color: #9D342A;
+    margin-top: 16px;
+}
+.error-box h3 { color: #9D342A; margin: 0; font-size: 1.1rem; }
+
+/* Dashboard KPI cards */
+.kpi-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 8px 0 26px;
+}
+.kpi-card {
+    flex: 1;
+    min-width: 0;
+    padding: 22px 23px;
+    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    box-shadow: 0 5px 18px rgba(24,52,66,.035);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+.kpi-card:before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: #94A3AD;
+}
+.kpi-total:before { background: #607785; }
+.kpi-positif:before { background: #0F8B8D; }
+.kpi-negatif:before { background: #D95D4F; }
+.kpi-title {
+    font-size: .83rem;
+    font-weight: 700;
+    margin: 0;
+    padding-bottom: 10px;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+    color: #71808D;
+}
+.kpi-value {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    line-height: 1.1;
+    font-weight: 800;
+    margin: 0;
+}
+[data-testid="stDataFrame"] { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+hr { border-color: var(--line); }
+small, .stCaption { color: var(--muted); }
+
+@media (max-width: 760px) {
+    .block-container { padding-left: 1rem; padding-right: 1rem; }
+    .top-banner { padding: 25px 22px; }
+    .content-box { padding: 20px 16px; }
+    .kpi-container { flex-direction: column; }
+    div[data-baseweb="tab"] { padding: 9px 10px; font-size: .82rem; }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # --- FUNGSI INISIALISASI SASTRAWI & NLTK ---
@@ -161,8 +320,9 @@ except Exception as e:
 # --- HEADER APLIKASI MODERN ---
 st.markdown("""
     <div class="top-banner">
-        <p class="main-header">🏛️ Dashboard Analisis Sentimen Aplikasi JAKI</p>
-        <p class="sub-header">Berbasis Support Vector Machine (SVM) | Oleh: Artha Nugraha</p>
+        <div class="eyebrow">Civic Intelligence · Analisis Data Publik</div>
+        <p class="main-header">Dashboard Analisis Sentimen JAKI</p>
+        <p class="sub-header">Pemantauan ulasan aplikasi pelayanan masyarakat · Model Support Vector Machine (SVM)</p>
     </div>
 """, unsafe_allow_html=True)
 
