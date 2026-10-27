@@ -1450,7 +1450,7 @@ def render_dashboard_visualisasi():
     """, unsafe_allow_html=True)
 
     if st.session_state.df_hasil is None:
-        st.warning("⚠️ Silakan unggah dan proses dataset terlebih dahulu pada bagian **Pemrosesan CSV** untuk mengaktifkan Dashboard Visualisasi.")
+        st.warning("⚠️ Silakan unggah dan proses dataset terlebih dahulu pada bagian **Pemrosesan CSV** untuk mengaktifkan Dashboard Visualisasi. Disarankan memiliki kolom (Tanggal_dan_jam, Jumlah_Like)")
         if st.button("Ke Pemrosesan CSV →", type="primary"):
             navigasi_ke("massal")
             st.rerun()
