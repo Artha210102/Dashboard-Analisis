@@ -1675,7 +1675,7 @@ def render_dashboard_visualisasi():
             with col1:
                 with st.container(border=True):
                     fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
-                             color='Sentimen', color_discrete_map=color_map, hole=0.15)
+                             color='Sentimen', color_discrete_map=color_map, hole=0.6)
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
                     fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
                     st.plotly_chart(fig_pie, use_container_width=True)
