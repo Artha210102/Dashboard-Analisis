@@ -1680,7 +1680,7 @@ def render_dashboard_visualisasi():
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_pie.update_layout(height=400, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                    fig_pie.update_layout(height=400, autosize=True, margin=dict(t=2, b=2, l=4, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
             with col2:
