@@ -1674,14 +1674,25 @@ def render_dashboard_visualisasi():
             
             with col1:
                 with st.container(border=True):
-                    st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
                     fig_pie = px.pie(
                         sentimen_counts, values='Jumlah', names='Sentimen',
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
-                    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_pie.update_layout(height=430, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                    fig_pie.update_traces(
+                        textposition='inside',
+                        textinfo='percent+label'
+                    )
+                    fig_pie.update_layout(
+                        title=dict(text='Sentimen Keseluruhan', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
+                        height=430, autosize=True,
+                        margin=dict(t=0, b=0, l=0, r=0),
+                        showlegend=True,
+                        legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
+                        paper_bgcolor='white', plot_bgcolor='white'
+                    )
+                    fig_pie.update_traces(domain=dict(x=[0.03, 0.97], y=[0.02, 0.88]))
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
+
 
             with col2:
                 with st.container(border=True):
