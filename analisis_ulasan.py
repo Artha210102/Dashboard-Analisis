@@ -1680,7 +1680,7 @@ def render_dashboard_visualisasi():
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_pie.update_layout(height=410, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                    fig_pie.update_layout(height=400, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
             with col2:
@@ -1691,7 +1691,7 @@ def render_dashboard_visualisasi():
                         text='Jumlah', color='Sentimen', color_discrete_map=color_map
                     )
                     fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-                    fig_bar.update_layout(height=410, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                    fig_bar.update_layout(height=400, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
     
             with col3:
@@ -1709,7 +1709,7 @@ def render_dashboard_visualisasi():
                             marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                             hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                         )
-                        fig_scatter.update_layout(height=410, autosize=True, margin=dict(t=8, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                        fig_scatter.update_layout(height=400, autosize=True, margin=dict(t=8, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
@@ -1719,7 +1719,7 @@ def render_dashboard_visualisasi():
             header_style = '<div class="jaki-chart-title">{}</div>'
 
             # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
-            TINGGI_GRAFIK = 410 
+            TINGGI_GRAFIK = 400
     
             col4, col5, col6 = st.columns(3)
             
@@ -1747,7 +1747,7 @@ def render_dashboard_visualisasi():
                                            color_continuous_scale="Blues", aspect="auto")
                         
                         fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
-                        # Set Tinggi Tetap (410px)
+                        # Set Tinggi Tetap (400px)
                         fig_hm.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=2, b=18, l=2, r=2), coloraxis_showscale=False, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_hm, use_container_width=True, config={'responsive': True})
                     else:
