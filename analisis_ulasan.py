@@ -1675,9 +1675,9 @@ def render_dashboard_visualisasi():
            with col1:
             fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
                              color='Sentimen', color_discrete_map=color_map, hole=0.4)
-            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pie.update_traces(texttemplate='%{text}', textposition='outside')
             fig_pie.update_layout(height=430, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
-            st.plotly_chart(fig_pie, use_container_width=True)
+            st.plotly_chart(fig_pie, use_container_width=True), config={'responsive': True})
 
             with col2:
                 with st.container(border=True):
