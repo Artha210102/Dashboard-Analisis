@@ -1031,8 +1031,7 @@ st.markdown(f"""
     <div class="mv-topbar">
         <div class="mv-topbar-left">
             <span class="mv-badge-research">● Penelitian Ilmiah</span>
-            <span>Arsitektur Klasifikasi Sentimen Ulasan Pada Aplikasi Jakarta Kini (JAKI) <br>
-            Menggunakan Algoritma Support Vector Machine (Sastrawi + TF-IDF)</span>
+            <span>Arsitektur Klasifikasi Sentimen Ulasan Pada Aplikasi Jakarta Kini (JAKI) Menggunakan (Sastrawi + TF-IDF + Support Vector Machine)</span>
         </div>
         <div class="mv-topbar-right">
             <span>Fitur: <strong style="color:#FFFFFF;">{jml_vocab:,} Token</strong></span>
@@ -1671,72 +1670,53 @@ def render_dashboard_visualisasi():
             col1, col2, col3 = st.columns(3)
             sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
             sentimen_counts.columns = ['Sentimen', 'Jumlah']
-            
+
             with col1:
                 with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
                     fig_pie = px.pie(
                         sentimen_counts, values='Jumlah', names='Sentimen',
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
-                    fig_pie.update_traces(
-                        textposition='inside',
-                        textinfo='percent+label'
-                    )
-                    fig_pie.update_layout(
-                        title=dict(text='Sentimen Keseluruhan', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                        height=430, autosize=True,
-                        margin=dict(t=0, b=0, l=0, r=0),
-                        showlegend=True,
-                        legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
-                        paper_bgcolor='white', plot_bgcolor='white'
-                    )
-                    fig_pie.update_traces(domain=dict(x=[0.05, 0.92], y=[0.02, 0.85]))
+                    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+                    fig_pie.update_layout(height=430, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
-
-                    with col2:
-                        with st.container(border=True):
-                            fig_bar = px.bar(
-                                sentimen_counts, x='Sentimen', y='Jumlah',
-                                text='Jumlah', color='Sentimen', color_discrete_map=color_map
-                            )
-                            fig_bar.update_traces(texttemplate='%{text}', textposition='outside', cliponaxis=False)
-                            fig_bar.update_layout(
-                                title=dict(text='Distribusi Jumlah', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                                height=430, autosize=True,
-                                margin=dict(t=30, b=0, l=0, r=0),
-                                showlegend=True,
-                                legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
-                                paper_bgcolor='white', plot_bgcolor='white'
-                            )
-                            st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
-
-                    with col3:
-                        with st.container(border=True):
-                            if 'Jumlah_Like' in df_viz.columns:
-                                df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
-                                df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
-                    
-                                fig_scatter = px.strip(
-                                    df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
-                                    custom_data=['Ulasan_Wrap'], color_discrete_map=color_map
-                                )
-                                fig_scatter.update_traces(
-                                    marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
-                                    hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
-                                )
-                                fig_scatter.update_layout(
-                                    title=dict(text='Sebaran Interaksi Ulasan (Berdasarkan Like)', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                                    height=430, autosize=True,
-                                    margin=dict(t=0, b=0, l=0, r=0),
-                                    showlegend=True,
-                                    legend=dict(orientation='v', x=0.98, xanchor='right', y=0.90, yanchor='top'),
-                                    paper_bgcolor='white', plot_bgcolor='white'
-                                )
-                                st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
-                            else:
-                                st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
-                    st.write("---")
+    
+            with col2:
+                with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Distribusi Jumlah</div>', unsafe_allow_html=True)
+                    fig_bar = px.bar(
+                        sentimen_counts, x='Sentimen', y='Jumlah',
+                        text='Jumlah', color='Sentimen', color_discrete_map=color_map
+                    )
+                    fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
+                    fig_bar.update_layout(height=430, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                    st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
+    
+            with col3:
+                with st.container(border=True):
+                    st.markdown('<div class="jaki-chart-title">Sebaran Interaksi Ulasan (Berdasarkan Like)</div>', unsafe_allow_html=True)
+                    if 'Jumlah_Like' in df_viz.columns:
+                        df_viz['Jumlah_Like'] = pd.to_numeric(df_viz['Jumlah_Like'], errors='coerce').fillna(0)
+                        df_viz['Ulasan_Wrap'] = df_viz['Ulasan'].apply(lambda x: '<br>'.join(textwrap.wrap(str(x), width=50)))
+    
+                        fig_scatter = px.strip(
+                            df_viz, x='Label_Sentimen', y='Jumlah_Like', color='Label_Sentimen',
+                            custom_data=['Ulasan_Wrap'], color_discrete_map=color_map
+                        )
+                        fig_scatter.update_traces(
+                            marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
+                            hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
+                        )
+                        fig_scatter.update_layout(height=430, autosize=True, margin=dict(t=8, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
+                        st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
+                    else:
+                        st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
+    
+            st.write("---")
             
+            header_style = '<div class="jaki-chart-title">{}</div>'
+
             # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
             TINGGI_GRAFIK = 430 
     
@@ -1805,9 +1785,8 @@ def render_dashboard_visualisasi():
                         fig_wc_neg.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=0, b=0, l=0, r=0), hovermode=False, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
     
-
     
-# =====================================================================
+    # =====================================================================
 # 7. ROUTING HALAMAN BERDASARKAN NAVBAR MENYATU DI ATAS
 # =====================================================================
 if st.session_state.halaman_aktif == "landing":
