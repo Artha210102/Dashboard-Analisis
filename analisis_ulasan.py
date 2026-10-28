@@ -823,6 +823,65 @@ st.markdown("""
         }
     }
 
+    /* FINAL OVERRIDES: bingkai KPI berwarna dan visualisasi memenuhi kartu */
+    .kpi-card.kpi-total {
+        border: 1.5px solid #CBD5E1 !important;
+        border-left: 5px solid #64748B !important;
+    }
+    .kpi-card.kpi-positif {
+        border: 1.5px solid #4E79A7 !important;
+        border-left: 5px solid #4E79A7 !important;
+        box-shadow: 0 4px 14px rgba(78, 121, 167, .10) !important;
+    }
+    .kpi-card.kpi-negatif {
+        border: 1.5px solid #E15759 !important;
+        border-left: 5px solid #E15759 !important;
+        box-shadow: 0 4px 14px rgba(225, 87, 89, .10) !important;
+    }
+    .kpi-card.kpi-positif:hover { border-color: #315F91 !important; }
+    .kpi-card.kpi-negatif:hover { border-color: #C83F42 !important; }
+
+    /* Kartu visualisasi: kurangi ruang dalam agar plot lebih memenuhi bingkai */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) {
+        padding: 6px !important;
+        background: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 12px !important;
+        height: 100%;
+        box-sizing: border-box;
+    }
+    .jaki-chart-title {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0 !important;
+        padding: 8px 8px 4px !important;
+        line-height: 1.3 !important;
+        overflow-wrap: anywhere;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) div[data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) .js-plotly-plot,
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) .plot-container,
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) .svg-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    @media (max-width: 760px) {
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.jaki-chart-title) {
+            padding: 5px !important;
+        }
+        .jaki-chart-title { padding: 7px 7px 3px !important; }
+        .kpi-card.kpi-positif, .kpi-card.kpi-negatif {
+            border-width: 1.5px !important;
+        }
+        .kpi-card.kpi-positif { border-left-width: 5px !important; }
+        .kpi-card.kpi-negatif { border-left-width: 5px !important; }
+    }
+
     </style>
 """, unsafe_allow_html=True)
 
@@ -1620,7 +1679,7 @@ def render_dashboard_visualisasi():
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_pie.update_layout(height=350, autosize=True, margin=dict(t=8, b=8, l=4, r=4), showlegend=True)
+                    fig_pie.update_layout(height=430, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
             with col2:
@@ -1631,7 +1690,7 @@ def render_dashboard_visualisasi():
                         text='Jumlah', color='Sentimen', color_discrete_map=color_map
                     )
                     fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-                    fig_bar.update_layout(height=350, autosize=True, margin=dict(t=18, b=28, l=8, r=8), showlegend=True)
+                    fig_bar.update_layout(height=430, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                     st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
     
             with col3:
@@ -1649,7 +1708,7 @@ def render_dashboard_visualisasi():
                             marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                             hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                         )
-                        fig_scatter.update_layout(height=350, autosize=True, margin=dict(t=12, b=28, l=8, r=8), showlegend=True)
+                        fig_scatter.update_layout(height=430, autosize=True, margin=dict(t=8, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
@@ -1659,7 +1718,7 @@ def render_dashboard_visualisasi():
             header_style = '<div class="jaki-chart-title">{}</div>'
 
             # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
-            TINGGI_GRAFIK = 390 
+            TINGGI_GRAFIK = 430 
     
             col4, col5, col6 = st.columns(3)
             
@@ -1688,7 +1747,7 @@ def render_dashboard_visualisasi():
                         
                         fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
                         # Set Tinggi Tetap (420px)
-                        fig_hm.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=8, b=24, l=4, r=4), coloraxis_showscale=False)
+                        fig_hm.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=2, b=18, l=2, r=2), coloraxis_showscale=False, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_hm, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
@@ -1710,7 +1769,7 @@ def render_dashboard_visualisasi():
                         fig_wc_pos = px.imshow(img_pos)
                         fig_wc_pos.update_xaxes(visible=False) # Sembunyikan sumbu X
                         fig_wc_pos.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                        fig_wc_pos.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=4, b=4, l=4, r=4), hovermode=False)
+                        fig_wc_pos.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=0, b=0, l=0, r=0), hovermode=False, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_wc_pos, use_container_width=True, config={'responsive': True})
         
             with col6:
@@ -1723,7 +1782,7 @@ def render_dashboard_visualisasi():
                         fig_wc_neg = px.imshow(img_neg)
                         fig_wc_neg.update_xaxes(visible=False) # Sembunyikan sumbu X
                         fig_wc_neg.update_yaxes(visible=False) # Sembunyikan sumbu Y
-                        fig_wc_neg.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=4, b=4, l=4, r=4), hovermode=False)
+                        fig_wc_neg.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=0, b=0, l=0, r=0), hovermode=False, paper_bgcolor='white', plot_bgcolor='white')
                         st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
     
     
