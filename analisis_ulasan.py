@@ -60,7 +60,7 @@ if logo_base64:
         /* Media query khusus untuk tampilan mobile/layar kecil */
         @media (max-width: 768px) {{
             .custom-logo-jaki {{
-                margin-top: -60px; /* Menarik logo lebih ke atas agar tidak tertutup di mobile */
+                margin-top: -100px; /* Menarik logo lebih ke atas agar tidak tertutup di mobile */
             }}
         }}
         </style>
