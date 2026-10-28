@@ -51,7 +51,7 @@ if logo_base64:
         f"""
         <style>
         .custom-logo-jaki {{
-            margin-top: -05px; /* Menarik logo sedikit ke atas untuk desktop */
+            margin-top: -20px; /* Menarik logo sedikit ke atas untuk desktop */
             width: 80px; /* Sesuaikan ukuran lebar logo Anda di sini */
             display: inline-block;
             vertical-align: middle;
@@ -60,7 +60,7 @@ if logo_base64:
         /* Media query khusus untuk tampilan mobile/layar kecil */
         @media (max-width: 768px) {{
             .custom-logo-jaki {{
-                margin-top: -10px; /* Menarik logo lebih ke atas agar tidak tertutup di mobile */
+                margin-top: -20px; /* Menarik logo lebih ke atas agar tidak tertutup di mobile */
             }}
         }}
         </style>
