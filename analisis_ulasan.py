@@ -1031,7 +1031,7 @@ st.markdown(f"""
     <div class="mv-topbar">
         <div class="mv-topbar-left">
             <span class="mv-badge-research">● Penelitian Ilmiah</span>
-            <span>Arsitektur Klasifikasi Sentimen Ulasan Pada Aplikasi Jakarta Kini (JAKI) 
+            <span>Arsitektur Klasifikasi Sentimen Ulasan Pada Aplikasi Jakarta Kini (JAKI) </span>
             <span>Menggunakan (Sastrawi + TF-IDF + Support Vector Machine)</span>
         </div>
         <div class="mv-topbar-right">
