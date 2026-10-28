@@ -1676,11 +1676,11 @@ def render_dashboard_visualisasi():
                 with st.container(border=True):
                     st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
                     fig_pie = px.pie(
-                        sentimen_counts, values='Jumlah', names='Sentimen',
-                        color='Sentimen', color_discrete_map=color_map, hole=0.4
+                        sentimen_counts, values='Jumlah', names='Label_Sentimen',
+                        color='Label_Sentimen', color_discrete_map=color_map, hole=0.4
                     )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label', domain=dict(x=[0.15, 0.95], y=[0.02, 0.98]))
-                    fig_pie.update_layout(height=400, autosize=True, margin=dict(t=2, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', 
+                    fig_pie.update_layout(height=400, autosize=True, margin=dict(t=6, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', 
                     )
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
@@ -1688,8 +1688,8 @@ def render_dashboard_visualisasi():
                 with st.container(border=True):
                     st.markdown('<div class="jaki-chart-title">Distribusi Jumlah</div>', unsafe_allow_html=True)
                     fig_bar = px.bar(
-                        sentimen_counts, x='Sentimen', y='Jumlah',
-                        text='Jumlah', color='Sentimen', color_discrete_map=color_map
+                        sentimen_counts, x='Label_Sentimen', y='Jumlah',
+                        text='Jumlah', color='Label_Sentimen', color_discrete_map=color_map
                     )
                     fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
                     fig_bar.update_layout(height=400, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
