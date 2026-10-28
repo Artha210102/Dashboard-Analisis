@@ -1735,106 +1735,76 @@ def render_dashboard_visualisasi():
                                 st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
                             else:
                                 st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
-
-            
                     st.write("---")
-                    
-                    TINGGI_GRAFIK = 430
-                    
-                    col4, col5, col6 = st.columns(3)
-                    
-                    with col4:
-                        with st.container(border=True):
-                            if 'Tanggal_dan_Jam' in df_viz.columns:
-                                df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
-                                hari_map = {0: 'Senin', 1: 'Selasa', 2: 'Rabu', 3: 'Kamis', 4: 'Jumat', 5: 'Sabtu', 6: 'Minggu'}
-                                df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
-                                df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
-                    
-                                heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
-                                pivot_data = heatmap_data.pivot(index='Hari', columns='Jam', values='Jumlah').fillna(0)
-                                kategori_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
-                                pivot_data = pivot_data.reindex(kategori_hari[::-1])
-                    
-                                for jam in range(24):
-                                    if jam not in pivot_data.columns:
-                                        pivot_data[jam] = 0
-                                pivot_data = pivot_data[sorted(pivot_data.columns)]
-                    
-                                fig_hm = px.imshow(
-                                    pivot_data,
-                                    labels=dict(x="Jam Masuk", y="", color="Jumlah"),
-                                    x=pivot_data.columns, y=pivot_data.index,
-                                    color_continuous_scale="Blues", aspect="auto"
-                                )
-                                fig_hm.update_traces(
-                                    hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>'
-                                )
-                                fig_hm.update_layout(
-                                    title=dict(text='Kecepatan Ulasan Peta Panas', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                                    height=TINGGI_GRAFIK, autosize=True,
-                                    margin=dict(t=0, b=0, l=0, r=0),
-                                    coloraxis_showscale=False,
-                                    paper_bgcolor='white', plot_bgcolor='white'
-                                )
-                                st.plotly_chart(fig_hm, use_container_width=True, config={'responsive': True})
-                            else:
-                                st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
-
+            
+            # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
+            TINGGI_GRAFIK = 430 
+    
+            col4, col5, col6 = st.columns(3)
+            
+            with col4:
+                with st.container(border=True):
+                    st.markdown(header_style.format("Kecepatan Ulasan Peta Panas"), unsafe_allow_html=True)
+                    if 'Tanggal_dan_Jam' in df_viz.columns:
+                        df_viz['Tanggal_dan_Jam_DT'] = pd.to_datetime(df_viz['Tanggal_dan_Jam'], errors='coerce')
+                        hari_map = {0:'Senin', 1:'Selasa', 2:'Rabu', 3:'Kamis', 4:'Jumat', 5:'Sabtu', 6:'Minggu'}
+                        df_viz['Hari'] = df_viz['Tanggal_dan_Jam_DT'].dt.dayofweek.map(hari_map)
+                        df_viz['Jam'] = df_viz['Tanggal_dan_Jam_DT'].dt.hour
+                        
+                        heatmap_data = df_viz.groupby(['Hari', 'Jam']).size().reset_index(name='Jumlah')
+                        pivot_data = heatmap_data.pivot(index='Hari', columns='Jam', values='Jumlah').fillna(0)
+                        kategori_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+                        pivot_data = pivot_data.reindex(kategori_hari[::-1])
+                        
+                        for jam in range(24):
+                            if jam not in pivot_data.columns:
+                                pivot_data[jam] = 0
+                        pivot_data = pivot_data[sorted(pivot_data.columns)]
+                        
+                        fig_hm = px.imshow(pivot_data, labels=dict(x="Jam Masuk", y="", color="Jumlah"),
+                                           x=pivot_data.columns, y=pivot_data.index, 
+                                           color_continuous_scale="Blues", aspect="auto")
+                        
+                        fig_hm.update_traces(hovertemplate='<b>Hari:</b> %{y}<br><b>Jam:</b> %{x}:00<br><b>Jumlah Ulasan Masuk:</b> %{z}<extra></extra>')
+                        # Set Tinggi Tetap (420px)
+                        fig_hm.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=2, b=18, l=2, r=2), coloraxis_showscale=False, paper_bgcolor='white', plot_bgcolor='white')
+                        st.plotly_chart(fig_hm, use_container_width=True, config={'responsive': True})
+                    else:
+                        st.info("💡 Kolom 'Tanggal_dan_Jam' tidak ditemukan untuk membuat Heatmap.")
         
-                    # FUNGSI BARU: Hasilkan array gambar WordCloud (Resolusi tinggi, bentuk kotak)
-                    def buat_wordcloud_array(teks_gabungan, colormap):
-                        if teks_gabungan.strip():
-                            wc = WordCloud(
-                                width=800, height=800, background_color='white',
-                                colormap=colormap, max_words=80
-                            ).generate(teks_gabungan)
-                            return wc.to_array()
-                        return None
+                # FUNGSI BARU: Hasilkan array gambar WordCloud (Resolusi tinggi, bentuk kotak)
+                def buat_wordcloud_array(teks_gabungan, colormap):
+                    if len(teks_gabungan) > 0:
+                        wc = WordCloud(width=800, height=800, background_color='white', colormap=colormap, max_words=80).generate(teks_gabungan)
+                        return wc.to_array() 
+                    return None
         
-                    with col5:
-                        with st.container(border=True):
-                            teks_pos = " ".join(
-                                review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'].dropna().astype(str)
-                            )
-                            img_pos = buat_wordcloud_array(teks_pos, "Blues")
-                    
-                            if img_pos is not None:
-                                fig_wc_pos = px.imshow(img_pos)
-                                fig_wc_pos.update_xaxes(visible=False)
-                                fig_wc_pos.update_yaxes(visible=False)
-                                fig_wc_pos.update_layout(
-                                    title=dict(text='Kata Kunci Positif', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                                    height=TINGGI_GRAFIK, autosize=True,
-                                    margin=dict(t=0, b=0, l=0, r=0),
-                                    hovermode=False,
-                                    paper_bgcolor='white', plot_bgcolor='white'
-                                )
-                                st.plotly_chart(fig_wc_pos, use_container_width=True, config={'responsive': True})
-                            else:
-                                st.info("Belum ada ulasan positif untuk membuat WordCloud.")
-
-                    with col6:
-                        with st.container(border=True):
-                            teks_neg = " ".join(
-                                review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'].dropna().astype(str)
-                            )
-                            img_neg = buat_wordcloud_array(teks_neg, "Reds")
-                    
-                            if img_neg is not None:
-                                fig_wc_neg = px.imshow(img_neg)
-                                fig_wc_neg.update_xaxes(visible=False)
-                                fig_wc_neg.update_yaxes(visible=False)
-                                fig_wc_neg.update_layout(
-                                    title=dict(text='Kata Kunci Negatif', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
-                                    height=TINGGI_GRAFIK, autosize=True,
-                                    margin=dict(t=0, b=0, l=0, r=0),
-                                    hovermode=False,
-                                    paper_bgcolor='white', plot_bgcolor='white'
-                                )
-                                st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
-                            else:
-                                st.info("Belum ada ulasan negatif untuk membuat WordCloud.")
+            with col5:
+                with st.container(border=True):
+                    st.markdown(header_style.format("Kata Kunci Positif"), unsafe_allow_html=True)
+                    teks_pos = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Positif']['Ulasan_Bersih'])
+                    img_pos = buat_wordcloud_array(teks_pos, "Blues")
+                    if img_pos is not None: 
+                        # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
+                        fig_wc_pos = px.imshow(img_pos)
+                        fig_wc_pos.update_xaxes(visible=False) # Sembunyikan sumbu X
+                        fig_wc_pos.update_yaxes(visible=False) # Sembunyikan sumbu Y
+                        fig_wc_pos.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=0, b=0, l=0, r=0), hovermode=False, paper_bgcolor='white', plot_bgcolor='white')
+                        st.plotly_chart(fig_wc_pos, use_container_width=True, config={'responsive': True})
+        
+            with col6:
+                with st.container(border=True):
+                    st.markdown(header_style.format("Kata Kunci Negatif"), unsafe_allow_html=True)
+                    teks_neg = " ".join(review for review in df_viz[df_viz['Label_Sentimen'] == 'Negatif']['Ulasan_Bersih'])
+                    img_neg = buat_wordcloud_array(teks_neg, "Reds")
+                    if img_neg is not None: 
+                        # BUNGKUS WORD CLOUD KE DALAM PLOTLY AGAR SIFATNYA SAMA DENGAN HEATMAP
+                        fig_wc_neg = px.imshow(img_neg)
+                        fig_wc_neg.update_xaxes(visible=False) # Sembunyikan sumbu X
+                        fig_wc_neg.update_yaxes(visible=False) # Sembunyikan sumbu Y
+                        fig_wc_neg.update_layout(height=TINGGI_GRAFIK, autosize=True, margin=dict(t=0, b=0, l=0, r=0), hovermode=False, paper_bgcolor='white', plot_bgcolor='white')
+                        st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
+    
 
     
 # =====================================================================
