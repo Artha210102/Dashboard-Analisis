@@ -14,10 +14,6 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
-import streamlit as st
-import base64
-import os
-
 # =====================================================================
 # 1. PENGATURAN HALAMAN & FUNGSI PEMBACA LOGO .WEBP LOKAL GITHUB
 # =====================================================================
@@ -47,73 +43,7 @@ def load_local_webp_logo():
 logo_base64 = load_local_webp_logo()
 
 # =====================================================================
-# 2. MENAMPILKAN LOGO & JUDUL (DITARIK NAIK UNTUK MOBILE)
-# =====================================================================
-if logo_base64:
-    st.markdown(
-        f"""
-        <style>
-        /* Container utama pembungkus Logo, Judul, dan Badge */
-        .custom-header-container {{
-            display: flex;
-            align-items: center;
-            margin-top: -15px; /* Naik sedikit di layar desktop/laptop */
-        }}
-        
-        .custom-logo-jaki {{
-            width: 55px; /* Sesuaikan ukuran logo (jangan terlalu besar) */
-            border-radius: 8px; /* Jika logo butuh sudut melengkung */
-        }}
-        
-        .custom-title {{
-            margin: 0;
-            padding: 0 0 0 12px;
-            font-size: 26px;
-            font-weight: bold;
-            color: inherit;
-        }}
-        
-        .custom-badge {{
-            background-color: #f0f2f6; /* Warna abu-abu ala Streamlit */
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: monospace;
-            margin-left: 12px;
-            color: #31333F;
-        }}
-        
-        /* ATURAN KHUSUS UNTUK HP (MOBILE VIEW) */
-        @media (max-width: 768px) {{
-            .custom-header-container {{
-                /* Menarik seluruh bagian (Logo + Judul + Badge) ke atas */
-                margin-top: -50px !important; 
-                margin-bottom: -10px; /* Menyesuaikan agar tombol di bawahnya tidak terlalu jauh */
-            }}
-            .custom-logo-jaki {{
-                width: 45px; /* Logo sedikit mengecil di HP */
-            }}
-            .custom-title {{
-                font-size: 22px; /* Font sedikit mengecil di HP */
-            }}
-            .custom-badge {{
-                font-size: 12px; /* Badge mengecil di HP */
-                padding: 2px 8px;
-            }}
-        }}
-        </style>
-        
-        <div class="custom-header-container">
-            <img src="{logo_base64}" class="custom-logo-jaki" alt="Logo JAKI">
-            <h2 class="custom-title">JAKIVision</h2>
-            <span class="custom-badge">v1.0 SVM</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# =====================================================================
-# 3. CSS KUSTOM: FLOATING NAVBAR PERSIS MUSAVISION + DOT GRID BACKGROUND
+# 2. CSS KUSTOM: FLOATING NAVBAR PERSIS MUSAVISION + DOT GRID BACKGROUND
 # =====================================================================
 st.markdown("""
     <style>
