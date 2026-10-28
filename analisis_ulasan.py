@@ -1674,12 +1674,15 @@ def render_dashboard_visualisasi():
 
             with col1:
                 with st.container(border=True):
-                    fig_pie = px.pie(sentimen_counts, values='Jumlah', names='Sentimen', title='Sentimen Keseluruhan',
-                             color='Sentimen', color_discrete_map=color_map, hole=0.4)
+                    st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
+                    fig_pie = px.pie(
+                        sentimen_counts, values='Jumlah', names='Sentimen',
+                        color='Sentimen', color_discrete_map=color_map, hole=0.4
+                    )
                     fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                    fig_bar.update_layout(height=450, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
-                    st.plotly_chart(fig_pie, use_container_width=True)
-    
+                    fig_pie.update_layout(margin=dict(t=40, b=20, l=10, r=10), showlegend=True)
+                    st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
+                    
             with col2:
                 with st.container(border=True):
                     st.markdown('<div class="jaki-chart-title">Distribusi Jumlah</div>', unsafe_allow_html=True)
