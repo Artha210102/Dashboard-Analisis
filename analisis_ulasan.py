@@ -1103,6 +1103,60 @@ with nb_cta:
         navigasi_ke("tunggal")
         st.rerun()
 
+# =====================================================================
+# INJEKSI CSS UNTUK MERAPIKAN NAVBAR BRAND (LOGO & TEKS)
+# =====================================================================
+st.markdown("""
+    <style>
+    /* Mengatur agar Logo, Judul, dan Badge sejajar secara horizontal */
+    #mv-nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;           /* Jarak antar elemen */
+        margin-top: -15px;   /* Tarik sedikit ke atas untuk desktop */
+    }
+    
+    /* Memastikan gambar logo (elemen_logo) ukurannya pas */
+    #mv-nav-brand img {
+        width: 50px !important; 
+        border-radius: 8px;
+    }
+    
+    .mv-brand-name {
+        font-size: 24px;
+        font-weight: 700;
+        white-space: nowrap; /* Mencegah teks turun ke bawah saat layar sempit */
+    }
+    
+    .mv-brand-ver {
+        background-color: #f0f2f6;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: monospace;
+        color: #31333F;
+        white-space: nowrap;
+    }
+
+    /* PENYESUAIAN KHUSUS UNTUK TAMPILAN MOBILE / HP */
+    @media (max-width: 768px) {
+        #mv-nav-brand {
+            margin-top: -50px !important; /* Menarik SATU KESATUAN (Logo+Teks) ke atas di HP */
+            margin-bottom: 10px;
+        }
+        #mv-nav-brand img {
+            width: 40px !important; /* Logo sedikit mengecil */
+        }
+        .mv-brand-name {
+            font-size: 20px; /* Teks sedikit mengecil */
+        }
+        .mv-brand-ver {
+            font-size: 11px;
+        }
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 # =====================================================================
 # 6. FUNGSI KOMPONEN HALAMAN
