@@ -1690,21 +1690,28 @@ def render_dashboard_visualisasi():
                         legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
                         paper_bgcolor='white', plot_bgcolor='white'
                     )
-                    fig_pie.update_traces(domain=dict(x=[0.03, 0.97], y=[0.02, 0.88]))
+                    fig_pie.update_traces(domain=dict(x=[0.05, 0.92], y=[0.02, 0.85]))
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
 
+                    with col2:
+                        with st.container(border=True):
+                            fig_bar = px.bar(
+                                sentimen_counts, x='Sentimen', y='Jumlah',
+                                text='Jumlah', color='Sentimen', color_discrete_map=color_map
+                            )
+                            fig_bar.update_traces(texttemplate='%{text}', textposition='outside', cliponaxis=False)
+                            fig_bar.update_layout(
+                                title=dict(text='Distribusi Jumlah', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
+                                height=430, autosize=True,
+                                margin=dict(t=20, b=0, l=0, r=0),
+                                showlegend=True,
+                                legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
+                                paper_bgcolor='white', plot_bgcolor='white'
+                            )
+                            st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
 
-            with col2:
-                with st.container(border=True):
-                    st.markdown('<div class="jaki-chart-title">Distribusi Jumlah</div>', unsafe_allow_html=True)
-                    fig_bar = px.bar(
-                        sentimen_counts, x='Sentimen', y='Jumlah',
-                        text='Jumlah', color='Sentimen', color_discrete_map=color_map
-                    )
-                    fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-                    fig_bar.update_layout(height=430, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white')
-                    st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
-    
+
+
             with col3:
                 with st.container(border=True):
                     st.markdown('<div class="jaki-chart-title">Sebaran Interaksi Ulasan (Berdasarkan Like)</div>', unsafe_allow_html=True)
