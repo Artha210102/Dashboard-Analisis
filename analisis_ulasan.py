@@ -1706,7 +1706,7 @@ def render_dashboard_visualisasi():
                         height=430, autosize=True,
                         margin=dict(t=30, b=0, l=0, r=0),
                         showlegend=True,
-                        legend=dict(orientation='v', x=0.97, xanchor='right', y=0.90, yanchor='top'),
+                        legend=dict(orientation='v', x=1.02, xanchor='right', y=0.90, yanchor='top'),
                         paper_bgcolor='white', plot_bgcolor='white'
                     )
                     st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
@@ -1729,9 +1729,9 @@ def render_dashboard_visualisasi():
                         fig_scatter.update_layout(
                             title=dict(text='Sebaran Interaksi Ulasan (Berdasarkan Like)', x=0.050, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
                             height=430, autosize=True,
-                            margin=dict(t=30, b=0, l=0, r=0),
+                            margin=dict(t=35, b=0, l=0, r=0),
                             showlegend=True,
-                            legend=dict(orientation='v', x=1, xanchor='right', y=0.90, yanchor='top'),
+                            legend=dict(orientation='v', x=1.02, xanchor='right', y=0.90, yanchor='top'),
                             paper_bgcolor='white', plot_bgcolor='white'
                         )
                         st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
