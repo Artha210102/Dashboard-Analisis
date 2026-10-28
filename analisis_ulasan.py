@@ -43,7 +43,38 @@ def load_local_webp_logo():
 logo_base64 = load_local_webp_logo()
 
 # =====================================================================
-# 2. CSS KUSTOM: FLOATING NAVBAR PERSIS MUSAVISION + DOT GRID BACKGROUND
+# 2. MENAMPILKAN LOGO DENGAN CSS KUSTOM AGAR NAIK DI VERSI MOBILE
+# =====================================================================
+if logo_base64:
+    # Injeksi CSS dan HTML untuk mengatur posisi logo
+    st.markdown(
+        f"""
+        <style>
+        .custom-logo-jaki {{
+            margin-top: -10px; /* Menarik logo sedikit ke atas untuk desktop */
+            width: 80px; /* Sesuaikan ukuran lebar logo Anda di sini */
+            display: inline-block;
+            vertical-align: middle;
+        }}
+        
+        /* Media query khusus untuk tampilan mobile/layar kecil */
+        @media (max-width: 768px) {{
+            .custom-logo-jaki {{
+                margin-top: -20px; /* Menarik logo lebih ke atas agar tidak tertutup di mobile */
+            }}
+        }}
+        </style>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="{logo_base64}" class="custom-logo-jaki" alt="Logo JAKI">
+            <h2 style="margin: 0; padding: 0;">JAKIVision</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# =====================================================================
+# 3. CSS KUSTOM: FLOATING NAVBAR PERSIS MUSAVISION + DOT GRID BACKGROUND
 # =====================================================================
 st.markdown("""
     <style>
