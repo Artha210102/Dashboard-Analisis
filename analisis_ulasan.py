@@ -1031,7 +1031,7 @@ st.markdown(f"""
     <div class="mv-topbar">
         <div class="mv-topbar-left">
             <span class="mv-badge-research">● Penelitian Ilmiah</span>
-            
+
             <div class="mv-topbar-title">
                 <span class="mv-topbar-heading">
                     Arsitektur Klasifikasi Sentimen Ulasan pada Aplikasi Jakarta Kini (JAKI)
@@ -1041,7 +1041,7 @@ st.markdown(f"""
                 </span>
             </div>
         </div>
-        
+
         <div class="mv-topbar-right">
             <span>Fitur: <strong style="color:#FFFFFF;">{jml_vocab:,} Token</strong></span>
             <span>&bull;</span>
@@ -1051,6 +1051,7 @@ st.markdown(f"""
         </div>
     </div>
 """, unsafe_allow_html=True)
+
 
 # Floating Navbar Menyatu (Logo Kiri | Menu Tengah | CTA Kanan) persis MusaVision
 nb_brand, nb_m1, nb_m2, nb_m3, nb_m4, nb_cta = st.columns([2.2, 1.05, 1.25, 1.25, 1.25, 1.15])
