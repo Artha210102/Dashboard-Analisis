@@ -1738,9 +1738,12 @@ def render_dashboard_visualisasi():
 
             
                         st.write("---")
-                        
-                        TINGGI_GRAFIK = 430
-                        
+            
+                        header_style = '<div class="jaki-chart-title">{}</div>'
+            
+                        # Tinggi grafik disamakan; lebar mengikuti ukuran kartu secara responsif.
+                        TINGGI_GRAFIK = 430 
+                
                         col4, col5, col6 = st.columns(3)
                         
                         with col4:
