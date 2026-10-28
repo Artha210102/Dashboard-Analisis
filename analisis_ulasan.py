@@ -1671,8 +1671,8 @@ def render_dashboard_visualisasi():
             col1, col2, col3 = st.columns(3)
             sentimen_counts = df_viz['Label_Sentimen'].value_counts().reset_index()
             sentimen_counts.columns = ['Sentimen', 'Jumlah']
-
-           with col1:
+            
+            with col1:
                 with st.container(border=True):
                     st.markdown('<div class="jaki-chart-title">Sentimen Keseluruhan</div>', unsafe_allow_html=True)
                     fig_pie = px.pie(
