@@ -1727,9 +1727,9 @@ def render_dashboard_visualisasi():
                             hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                         )
                         fig_scatter.update_layout(
-                            title=dict(text='Sebaran Interaksi Ulasan (Berdasarkan Like)', x=0.025, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
+                            title=dict(text='Sebaran Interaksi Ulasan (Berdasarkan Like)', x=0.035, xanchor='left', y=0.98, yanchor='top', font=dict(size=18, color='#334155')),
                             height=430, autosize=True,
-                            margin=dict(t=0, b=0, l=0, r=0),
+                            margin=dict(t=30, b=0, l=0, r=0),
                             showlegend=True,
                             legend=dict(orientation='v', x=0.98, xanchor='right', y=0.90, yanchor='top'),
                             paper_bgcolor='white', plot_bgcolor='white'
