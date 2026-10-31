@@ -1766,7 +1766,7 @@ def render_dashboard_visualisasi():
                         text='Jumlah', color='Sentimen', color_discrete_map=color_map
                     )
                     fig_bar.update_traces(texttemplate='%{text}', textposition='outside')
-                    fig_bar.update_layout(height=400, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', legend=dict(title=dict(text='Sentimen'), x=0.98, y=0.95, xanchor='right', yanchor='top'))
+                    fig_bar.update_layout(height=400, autosize=True, margin=dict(t=12, b=22, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', legend=dict(title=dict(text='Sentimen'), x=1.05, y=0.95, xanchor='right', yanchor='top'))
                     st.plotly_chart(fig_bar, use_container_width=True, config={'responsive': True})
     
             with col3:
