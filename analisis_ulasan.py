@@ -1104,7 +1104,7 @@ with nb_cta:
         st.rerun()
 
 # =====================================================================
-# INJEKSI CSS UNTUK MERAPIKAN NAVBAR BRAND (LOGO & TEKS)
+# 6. INJEKSI CSS UNTUK MERAPIKAN NAVBAR BRAND (LOGO & TEKS)
 # =====================================================================
 st.markdown("""
     <style>
@@ -1114,6 +1114,7 @@ st.markdown("""
         align-items: center;
         gap: 12px;           /* Jarak antar elemen */
         margin-top: -15px;   /* Tarik sedikit ke atas untuk desktop */
+        flex-wrap: wrap;     /* MENGIZINKAN ELEMEN TURUN KE BARIS BARU JIKA SEMPIT */
     }
     
     /* Memastikan gambar logo (elemen_logo) ukurannya pas */
@@ -1138,8 +1139,25 @@ st.markdown("""
         white-space: nowrap;
     }
 
+    /* PENYESUAIAN UNTUK TABLET (iPad Mini) - 768px hingga 1024px */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        #mv-nav-brand {
+            gap: 6px; /* Mengurangi jarak antar elemen agar muat */
+        }
+        #mv-nav-brand img {
+            width: 35px !important; /* Mengecilkan logo di tablet */
+        }
+        .mv-brand-name {
+            font-size: 18px; /* Mengecilkan teks judul di tablet */
+        }
+        .mv-brand-ver {
+            font-size: 10px; /* Mengecilkan teks badge di tablet */
+            padding: 2px 4px;
+        }
+    }
+
     /* PENYESUAIAN KHUSUS UNTUK TAMPILAN MOBILE / HP */
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
         #mv-nav-brand {
             margin-top: -10px !important; /* Menarik SATU KESATUAN (Logo+Teks) ke atas di HP */
             margin-bottom: 10px;
@@ -1158,7 +1176,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 6. FUNGSI KOMPONEN HALAMAN
+# 7. FUNGSI KOMPONEN HALAMAN
 # =====================================================================
 def render_hero_section():
     hero_kiri, hero_kanan = st.columns([7, 5], gap="medium")
@@ -1841,8 +1859,8 @@ def render_dashboard_visualisasi():
                         st.plotly_chart(fig_wc_neg, use_container_width=True, config={'responsive': True})
     
     
-    # =====================================================================
-# 7. ROUTING HALAMAN BERDASARKAN NAVBAR MENYATU DI ATAS
+# =====================================================================
+# 8. ROUTING HALAMAN BERDASARKAN NAVBAR MENYATU DI ATAS
 # =====================================================================
 if st.session_state.halaman_aktif == "landing":
     render_hero_section()
