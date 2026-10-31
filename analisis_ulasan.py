@@ -1141,7 +1141,7 @@ st.markdown("""
     /* PENYESUAIAN KHUSUS UNTUK TAMPILAN MOBILE / HP */
     @media (max-width: 768px) {
         #mv-nav-brand {
-            margin-top: -70px !important; /* Menarik SATU KESATUAN (Logo+Teks) ke atas di HP */
+            margin-top: -20px !important; /* Menarik SATU KESATUAN (Logo+Teks) ke atas di HP */
             margin-bottom: 10px;
         }
         #mv-nav-brand img {
