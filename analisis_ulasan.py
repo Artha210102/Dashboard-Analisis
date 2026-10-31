@@ -1784,7 +1784,7 @@ def render_dashboard_visualisasi():
                             marker=dict(size=8, opacity=0.7, line=dict(width=1, color='DarkSlateGrey')),
                             hovertemplate="<b>Sentimen:</b> %{x}<br><b>Jumlah Like:</b> %{y}<br><br><b>Ulasan:</b><br>%{customdata[0]}<extra></extra>"
                         )
-                        fig_scatter.update_layout(height=400, autosize=True, margin=dict(t=15, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', legend=dict(x=1.40, y=0.95, xanchor='right', yanchor='top'))
+                        fig_scatter.update_layout(height=400, autosize=True, margin=dict(t=17, b=20, l=4, r=4), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', legend=dict(x=1.40, y=0.95, xanchor='right', yanchor='top'))
                         st.plotly_chart(fig_scatter, use_container_width=True, config={'responsive': True})
                     else:
                         st.info("💡 Kolom 'Jumlah_Like' tidak ada di data.")
