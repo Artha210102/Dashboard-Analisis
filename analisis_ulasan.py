@@ -1112,21 +1112,22 @@ st.markdown("""
     #mv-nav-brand {
         display: flex;
         align-items: center;
-        gap: 12px;           /* Jarak antar elemen */
-        margin-top: -15px;   /* Tarik sedikit ke atas untuk desktop */
-        flex-wrap: wrap;     /* MENGIZINKAN ELEMEN TURUN KE BARIS BARU JIKA SEMPIT */
+        gap: 10px;           /* Jarak antar elemen sedikit dikurangi */
+        margin-top: -15px;   
+        flex-wrap: nowrap;   /* PASTIKAN INI NOWRAP: Mencegah elemen turun ke baris baru */
+        overflow: hidden;    /* Mencegah tumpahan jika benar-benar sempit */
     }
     
-    /* Memastikan gambar logo (elemen_logo) ukurannya pas */
     #mv-nav-brand img {
-        width: 50px !important; 
+        width: 45px !important; /* Ukuran dasar sedikit diperkecil */
         border-radius: 8px;
+        flex-shrink: 0; /* Mencegah gambar ikut menyusut gepeng */
     }
     
     .mv-brand-name {
-        font-size: 24px;
+        font-size: 22px; /* Ukuran font dasar disesuaikan */
         font-weight: 700;
-        white-space: nowrap; /* Mencegah teks turun ke bawah saat layar sempit */
+        white-space: nowrap; 
     }
     
     .mv-brand-ver {
@@ -1137,21 +1138,23 @@ st.markdown("""
         font-family: monospace;
         color: #31333F;
         white-space: nowrap;
+        flex-shrink: 0; /* Mencegah badge terpotong */
     }
 
-    /* PENYESUAIAN UNTUK TABLET (iPad Mini) - 768px hingga 1024px */
+    /* PENYESUAIAN UNTUK TABLET (iPad Mini, dll) - 768px hingga 1024px */
     @media (min-width: 768px) and (max-width: 1024px) {
         #mv-nav-brand {
-            gap: 6px; /* Mengurangi jarak antar elemen agar muat */
+            gap: 4px; /* Kurangi jarak sangat rapat di tablet */
+            margin-top: -10px; /* Sedikit penyesuaian posisi atas */
         }
         #mv-nav-brand img {
-            width: 35px !important; /* Mengecilkan logo di tablet */
+            width: 32px !important; /* Logo mengecil di tablet */
         }
         .mv-brand-name {
-            font-size: 18px; /* Mengecilkan teks judul di tablet */
+            font-size: 16px; /* Font judul mengecil agar muat sebaris */
         }
         .mv-brand-ver {
-            font-size: 10px; /* Mengecilkan teks badge di tablet */
+            font-size: 10px; 
             padding: 2px 4px;
         }
     }
@@ -1159,14 +1162,15 @@ st.markdown("""
     /* PENYESUAIAN KHUSUS UNTUK TAMPILAN MOBILE / HP */
     @media (max-width: 767px) {
         #mv-nav-brand {
-            margin-top: -10px !important; /* Menarik SATU KESATUAN (Logo+Teks) ke atas di HP */
+            margin-top: -10px !important; 
             margin-bottom: 10px;
+            justify-content: flex-start; /* Pastikan rata kiri di HP */
         }
         #mv-nav-brand img {
-            width: 40px !important; /* Logo sedikit mengecil */
+            width: 40px !important; 
         }
         .mv-brand-name {
-            font-size: 20px; /* Teks sedikit mengecil */
+            font-size: 20px; 
         }
         .mv-brand-ver {
             font-size: 11px;
