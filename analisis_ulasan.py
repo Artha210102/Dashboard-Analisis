@@ -177,7 +177,7 @@ st.markdown("""
         /* 👇 INI YANG DIPERBAIKI: Mengubah -1rem menjadi 0rem agar tidak menabrak ke atas 👇 */
         margin-top: 0rem !important; 
         
-        margin-bottom: 12px !important;
+        margin-bottom: 24px !important;
         align-items: center !important;
         box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.06);
     }
