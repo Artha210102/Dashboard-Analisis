@@ -1754,7 +1754,7 @@ def render_dashboard_visualisasi():
                         sentimen_counts, values='Jumlah', names='Sentimen',
                         color='Sentimen', color_discrete_map=color_map, hole=0.4
                     )
-                    fig_pie.update_traces(textposition='inside', textinfo='percent+label', domain=dict(x=[0.10, 0.95], y=[0.10, 0.90]))
+                    fig_pie.update_traces(textposition='inside', textinfo='percent+label', domain=dict(x=[0.10, 0.90], y=[0.10, 0.90]))
                     fig_pie.update_layout(height=400, autosize=True, margin=dict(t=6, b=2, l=2, r=2), showlegend=True, paper_bgcolor='white', plot_bgcolor='white', legend=dict(title=dict(text='Sentimen'), x=0.98, y=0.95, xanchor='right', yanchor='top'))
                     st.plotly_chart(fig_pie, use_container_width=True, config={'responsive': True})
     
